@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         YATA OC
 // @namespace    yata.alwaysdata.net
-// @version      0.0.3
+// @version      0.0.4
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
-// @author       Pyrit[2111649]
+// @author       Pyrit [2111649]
 // @match        https://www.torn.com/factions.php*
 // @grant        GM.xmlHttpRequest
 // @connect      yata.alwaysdata.net
@@ -108,6 +108,25 @@ function render(component) {
 
 // }}}
 
+// {{{ components
+
+const primitive = (tag) => (params) => ({
+    tag,
+    ...params,
+});
+
+const div = primitive("div");
+const li = primitive("li");
+const i = primitive("i");
+
+const nnbCol = ({ content }) =>
+    li({
+        classes: ["yata-nnb"],
+        children: [content, div({ classes: ["delimiter-white"] })],
+    });
+
+// }}}
+
 // {{{ state management
 
 let state = {};
@@ -178,17 +197,7 @@ const ocListListener = new MemoListener(
         ].forEach((title) => {
             title.insertAdjacentHTML(
                 "afterend",
-                render({
-                    tag: "li",
-                    classes: ["yata-nnb"],
-                    children: [
-                        "NNB (YATA)",
-                        {
-                            tag: "div",
-                            classes: ["delimiter-white"],
-                        },
-                    ],
-                })
+                render(nnbCol({ content: "NNB (YATA)" }))
             );
         });
 
@@ -197,17 +206,11 @@ const ocListListener = new MemoListener(
                 const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
                 item.querySelector(".level").insertAdjacentHTML(
                     "afterend",
-                    render({
-                        tag: "li",
-                        classes: ["yata-nnb"],
-                        children: [
-                            data.members[userID]?.NNB ?? "-",
-                            {
-                                tag: "div",
-                                classes: ["delimiter-white"],
-                            },
-                        ],
-                    })
+                    render(
+                        nnbCol({
+                            content: data.members[userID]?.NNB ?? "-",
+                        })
+                    )
                 );
             }
         );
@@ -232,17 +235,7 @@ const ocPlannerListener = new MemoListener(
             (offences) => {
                 offences.insertAdjacentHTML(
                     "afterend",
-                    render({
-                        tag: "li",
-                        classes: ["yata-nnb"],
-                        children: [
-                            "NNB (YATA)",
-                            {
-                                tag: "div",
-                                classes: ["delimiter-white"],
-                            },
-                        ],
-                    })
+                    render(nnbCol({ content: "NNB (YATA)" }))
                 );
             }
         );
@@ -253,17 +246,7 @@ const ocPlannerListener = new MemoListener(
             const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
             item.querySelector(".offences").insertAdjacentHTML(
                 "afterend",
-                render({
-                    tag: "li",
-                    classes: ["yata-nnb"],
-                    children: [
-                        data.members[userID]?.NNB ?? "-",
-                        {
-                            tag: "div",
-                            classes: ["delimiter-white"],
-                        },
-                    ],
-                })
+                render(nnbCol({ content: data.members[userID]?.NNB ?? "-" }))
             );
         });
     }
@@ -320,33 +303,25 @@ function updateMessage(message, color) {
             );
     }
 
-    const component = {
-        tag: "div",
+    const component = div({
         classes: ["info-msg-cont", "border-round", "yata-message", color],
-        children: {
-            tag: "div",
+        children: div({
             classes: ["info-msg border-round"],
             children: [
-                {
-                    tag: "i",
-                    classes: ["info-icon"],
-                },
-                {
-                    tag: "div",
+                i({ classes: ["info-icon"] }),
+                div({
                     classes: ["delimiter"],
-                    children: {
-                        tag: "div",
+                    children: div({
                         classes: ["msg", "right-round"],
-                        children: {
-                            tag: "div",
+                        children: div({
                             classes: ["ajax-action"],
                             children: `YATA: ${message}`,
-                        },
-                    },
-                },
+                        }),
+                    }),
+                }),
             ],
-        },
-    };
+        }),
+    });
 
     messageElement.innerHTML = render(component);
 }
