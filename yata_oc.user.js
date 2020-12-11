@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.alwaysdata.net
-// @version      0.0.5
+// @version      0.0.6
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit [2111649]
@@ -26,16 +26,40 @@ styles.innerHTML = `
 
 .yata-nnb {
     text-align: left !important;
-    width: 100px;
+    width: 80px;
     display: inline-block;
 }
 
-.level {
-    width: 50px !important;
+.yata-rank {
+    text-align: left !important;
+    width: 35px;
+    display: inline-block;
+}
+
+.yata-ea {
+    text-align: left !important;
+    width: 40px;
+    display: inline-block;
+}
+
+.organize-wrap .level {
+    width: 57px !important;
 }
 
 .plans-list li.member {
     width: 200px !important;
+}
+
+.plans-list li.offences {
+    width: 80px !important;
+}
+
+.plans-list li.stat {
+    width: 80px !important;
+}
+
+.plans-list .level {
+    width: 50px !important;
 }
 
 .yata-marker {
@@ -107,6 +131,11 @@ function render(component) {
     );
 }
 
+const map = (transform) => (arg) => {
+    if (arg === null || arg === undefined) return arg;
+    return transform(arg);
+};
+
 // }}}
 
 // {{{ components
@@ -120,11 +149,20 @@ const div = primitive("div");
 const li = primitive("li");
 const i = primitive("i");
 
-const nnbCol = ({ content }) =>
+const nnbCol = ({ nnb, rank, ea }) => [
     li({
         classes: ["yata-nnb"],
-        children: [content, div({ classes: ["delimiter-white"] })],
-    });
+        children: [nnb, div({ classes: ["delimiter-white"] })],
+    }),
+    li({
+        classes: ["yata-rank"],
+        children: [rank, div({ classes: ["delimiter-white"] })],
+    }),
+    li({
+        classes: ["yata-ea"],
+        children: [ea, div({ classes: ["delimiter-white"] })],
+    }),
+];
 
 // }}}
 
@@ -190,7 +228,7 @@ const ocListListener = new MemoListener(
             return;
         ocList.insertAdjacentHTML(
             "afterbegin",
-            render({ tag: "div", classes: ["yata-marker"] })
+            render(div({ classes: ["yata-marker"] }))
         );
 
         [
@@ -198,7 +236,7 @@ const ocListListener = new MemoListener(
         ].forEach((title) => {
             title.insertAdjacentHTML(
                 "afterend",
-                render(nnbCol({ content: "NNB (YATA)" }))
+                render(nnbCol({ nnb: "NNB (YATA)", rank: "rank", ea: "EA" }))
             );
         });
 
@@ -209,7 +247,12 @@ const ocListListener = new MemoListener(
                     "afterend",
                     render(
                         nnbCol({
-                            content: data.members[userID]?.NNB ?? "-",
+                            nnb: data.members[userID]?.NNB ?? "-",
+                            rank:
+                                map((rank) => "#" + rank)(
+                                    data.members[userID]?.ce_rank
+                                ) ?? "-",
+                            ea: data.members[userID]?.equivalent_arsons ?? "-",
                         })
                     )
                 );
@@ -229,14 +272,16 @@ const ocPlannerListener = new MemoListener(
             return;
         ocPlanner.insertAdjacentHTML(
             "afterbegin",
-            render({ tag: "div", classes: ["yata-marker"] })
+            render(div({ classes: ["yata-marker"] }))
         );
 
         [...ocPlanner.querySelectorAll("ul.title .offences")].forEach(
             (offences) => {
                 offences.insertAdjacentHTML(
                     "afterend",
-                    render(nnbCol({ content: "NNB (YATA)" }))
+                    render(
+                        nnbCol({ nnb: "NNB (YATA)", rank: "rank", ea: "EA" })
+                    )
                 );
             }
         );
@@ -247,7 +292,16 @@ const ocPlannerListener = new MemoListener(
             const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
             item.querySelector(".offences").insertAdjacentHTML(
                 "afterend",
-                render(nnbCol({ content: data.members[userID]?.NNB ?? "-" }))
+                render(
+                    nnbCol({
+                        nnb: data.members[userID]?.NNB ?? "-",
+                        rank:
+                            map((rank) => "#" + rank)(
+                                data.members[userID]?.ce_rank
+                            ) ?? "-",
+                        ea: data.members[userID]?.equivalent_arsons ?? "-",
+                    })
+                )
             );
         });
     }
