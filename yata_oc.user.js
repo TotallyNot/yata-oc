@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA OC
 // @namespace    yata.alwaysdata.net
-// @version      0.0.1
+// @version      0.0.2
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit[2111649]
@@ -13,6 +13,25 @@
 
 const apiKey = "";
 
+/// {{{ styles
+
+const styles = document.createElement("style");
+styles.setAttribute("type", "text/css");
+styles.innerHTML = `
+.yata-nnb {
+    text-align: left;
+    width: 100px;
+    display: inline-block;
+}
+
+.level {
+    width: 50px !important;
+}
+`;
+
+document.querySelector("head").appendChild(styles);
+// }}}
+
 // {{{ convenience functions
 
 function gmFetch(url, config) {
@@ -21,7 +40,7 @@ function gmFetch(url, config) {
             url,
             method: config?.method,
             headers: config?.headers,
-            body: config?.data,
+            data: config?.data,
             onload: (response) =>
                 resolve(
                     new Response(response.response, {
@@ -41,6 +60,35 @@ function gmFetch(url, config) {
     });
 }
 
+function render(component) {
+    if (component === undefined) {
+        return "";
+    }
+
+    if (typeof component === "string") {
+        return component;
+    }
+
+    if (Array.isArray(component)) {
+        return component.map(render).join("");
+    }
+
+    const classes = component.classes?.join(" ");
+    const attributes = Object.entries({
+        ...component.attributes,
+        class: classes,
+    })
+        .filter(([_, value]) => value !== undefined)
+        .map(([name, value]) => `${name}="${value}"`)
+        .join(" ");
+
+    return (
+        `<${component.tag} ${attributes}>` +
+        `${render(component.children)}` +
+        `</${component.tag}>`
+    );
+}
+
 // }}}
 
 // {{{ state management
@@ -48,15 +96,21 @@ function gmFetch(url, config) {
 let state = {};
 const listeners = [];
 
-function reducer(action) {
-    state = { ...state, ...action };
-    listeners.forEach((listener) => listener(state));
+function reducer(update) {
+    state = { ...state, ...update };
+    console.debug(state, update);
+    listeners.forEach((listener) => listener.handler(state));
 }
 
 function shallowCompare(newObj, prevObj) {
+    if (Object.keys(newObj).count !== Object.keys(prevObj).count) return false;
+
+    if (Object.keys(newObj).length === 0) return true;
+
     for (const key in newObj) {
         if (newObj[key] !== prevObj[key]) return false;
     }
+
     return true;
 }
 
@@ -66,29 +120,83 @@ function pick(object, keys) {
     );
 }
 
-function memoListener(propKeys, body) {
-    return function (state) {
-        const props = pick(state, propKeys);
+class MemoListener {
+    constructor(propKeys, body) {
+        this.propKeys = propKeys;
+        this.body = body;
+    }
+
+    handler(state) {
+        const props = pick(state, this.propKeys);
 
         if (this.prevProps && shallowCompare(props, this.prevProps)) return;
 
         this.prevProps = props;
-        body(props);
-    };
+        this.body(props);
+    }
 }
 
-const errorListener = memoListener(["error"], ({ error }) => {
+// }}}
+
+// {{{ OC page
+
+const errorListener = new MemoListener(["error"], ({ error }) => {
     if (error !== undefined) {
         updateMessage(error, "red");
     }
 });
 
-const ocListListener = memoListener(["ocList", "data"], ({ ocList, data }) => {
-    if (!data || !ocList) return;
-    console.log("update oc list...");
-});
+const ocListListener = new MemoListener(
+    ["ocList", "data", "rendering"],
+    ({ ocList, data, rendering }) => {
+        if (!data || !ocList || rendering) return;
 
-const ocPlannerListener = memoListener(
+        reducer({ rendering: true });
+
+        [
+            ...ocList.querySelectorAll("ul.details-list ul.title > .level"),
+        ].forEach((title) => {
+            title.insertAdjacentHTML(
+                "afterend",
+                render({
+                    tag: "li",
+                    classes: ["yata-nnb"],
+                    children: [
+                        "NNB (YATA)",
+                        {
+                            tag: "div",
+                            classes: ["delimiter-white"],
+                        },
+                    ],
+                })
+            );
+        });
+
+        [...ocList.querySelectorAll("ul.details-list ul.item")].forEach(
+            (item) => {
+                const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
+                item.querySelector(".level").insertAdjacentHTML(
+                    "afterend",
+                    render({
+                        tag: "li",
+                        classes: ["yata-nnb"],
+                        children: [
+                            data.members[userID]?.NNB ?? "-",
+                            {
+                                tag: "div",
+                                classes: ["delimiter-white"],
+                            },
+                        ],
+                    })
+                );
+            }
+        );
+
+        reducer({ rendering: true });
+    }
+);
+
+const ocPlannerListener = new MemoListener(
     ["ocPlanner", "data"],
     ({ ocPlanner, data }) => {
         if (!data || !ocPlanner) return;
@@ -96,7 +204,7 @@ const ocPlannerListener = memoListener(
     }
 );
 
-const yataListener = memoListener(
+const yataListener = new MemoListener(
     ["ocList", "ocPlanner", "data", "fetchingData"],
     (props) => {
         if (
@@ -147,20 +255,38 @@ function updateMessage(message, color) {
             );
     }
 
-    messageElement.innerHTML = `
-        <div class="info-msg-cont border-round ${color}" style="display:block;margin-top:8px">
-            <div class="info-msg border-round">
-                <i class="info-icon"></i>
-                <div class="delimiter">
-                    <div class="msg right-round">
-                        <div class="ajax-action">
-                            YATA: ${message}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    const component = {
+        tag: "div",
+        classes: ["info-msg-cont", "border-round", color],
+        attributes: {
+            style: "display:block;margin-top:8px",
+        },
+        children: {
+            tag: "div",
+            classes: ["info-msg border-round"],
+            children: [
+                {
+                    tag: "i",
+                    classes: ["info-icon"],
+                },
+                {
+                    tag: "div",
+                    classes: ["delimiter"],
+                    children: {
+                        tag: "div",
+                        classes: ["msg", "right-round"],
+                        children: {
+                            tag: "div",
+                            classes: ["ajax-action"],
+                            children: `YATA: ${message}`,
+                        },
+                    },
+                },
+            ],
+        },
+    };
+
+    messageElement.innerHTML = render(component);
 }
 
 const crimeObserver = new MutationObserver((records) => {
