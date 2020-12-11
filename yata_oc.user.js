@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA OC
 // @namespace    yata.alwaysdata.net
-// @version      0.0.2
+// @version      0.0.3
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit[2111649]
@@ -13,19 +13,32 @@
 
 const apiKey = "";
 
-/// {{{ styles
+// {{{ styles
 
 const styles = document.createElement("style");
 styles.setAttribute("type", "text/css");
 styles.innerHTML = `
+.yata-message {
+    display: block;
+    margin-top: 8px;
+}
+
 .yata-nnb {
-    text-align: left;
+    text-align: left !important;
     width: 100px;
     display: inline-block;
 }
 
 .level {
     width: 50px !important;
+}
+
+.plans-list li.member {
+    width: 200px !important;
+}
+
+.yata-marker {
+    display: none;
 }
 `;
 
@@ -67,6 +80,10 @@ function render(component) {
 
     if (typeof component === "string") {
         return component;
+    }
+
+    if (typeof component === "number") {
+        return component.toString();
     }
 
     if (Array.isArray(component)) {
@@ -147,11 +164,14 @@ const errorListener = new MemoListener(["error"], ({ error }) => {
 });
 
 const ocListListener = new MemoListener(
-    ["ocList", "data", "rendering"],
-    ({ ocList, data, rendering }) => {
-        if (!data || !ocList || rendering) return;
-
-        reducer({ rendering: true });
+    ["ocList", "data"],
+    ({ ocList, data }) => {
+        if (!data || !ocList || ocList.querySelector(".yata-marker") !== null)
+            return;
+        ocList.insertAdjacentHTML(
+            "afterbegin",
+            render({ tag: "div", classes: ["yata-marker"] })
+        );
 
         [
             ...ocList.querySelectorAll("ul.details-list ul.title > .level"),
@@ -191,16 +211,61 @@ const ocListListener = new MemoListener(
                 );
             }
         );
-
-        reducer({ rendering: true });
     }
 );
 
 const ocPlannerListener = new MemoListener(
     ["ocPlanner", "data"],
     ({ ocPlanner, data }) => {
-        if (!data || !ocPlanner) return;
-        console.log("update oc planner...");
+        if (
+            !data ||
+            !ocPlanner ||
+            ocPlanner.querySelector(".yata-marker") !== null
+        )
+            return;
+        ocPlanner.insertAdjacentHTML(
+            "afterbegin",
+            render({ tag: "div", classes: ["yata-marker"] })
+        );
+
+        [...ocPlanner.querySelectorAll("ul.title .offences")].forEach(
+            (offences) => {
+                offences.insertAdjacentHTML(
+                    "afterend",
+                    render({
+                        tag: "li",
+                        classes: ["yata-nnb"],
+                        children: [
+                            "NNB (YATA)",
+                            {
+                                tag: "div",
+                                classes: ["delimiter-white"],
+                            },
+                        ],
+                    })
+                );
+            }
+        );
+
+        [
+            ...ocPlanner.querySelectorAll(".plans-list ul.item:not(.title)"),
+        ].forEach((item) => {
+            const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
+            item.querySelector(".offences").insertAdjacentHTML(
+                "afterend",
+                render({
+                    tag: "li",
+                    classes: ["yata-nnb"],
+                    children: [
+                        data.members[userID]?.NNB ?? "-",
+                        {
+                            tag: "div",
+                            classes: ["delimiter-white"],
+                        },
+                    ],
+                })
+            );
+        });
     }
 );
 
@@ -257,10 +322,7 @@ function updateMessage(message, color) {
 
     const component = {
         tag: "div",
-        classes: ["info-msg-cont", "border-round", color],
-        attributes: {
-            style: "display:block;margin-top:8px",
-        },
+        classes: ["info-msg-cont", "border-round", "yata-message", color],
         children: {
             tag: "div",
             classes: ["info-msg border-round"],
