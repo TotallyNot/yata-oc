@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.alwaysdata.net
-// @version      0.0.8
+// @version      1.0.0
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit [2111649]
 // @match        https://www.torn.com/factions.php*
 // @grant        GM.xmlHttpRequest
+// @grant        GM.setValue
+// @grant        GM.getValue
 // @connect      yata.alwaysdata.net
 // @run-at       document-end
 // @icon64       data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTMuMTAxbW0iIGhlaWdodD0iOTMuMTAxbW0iIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDkzLjEwMSA5My4xMDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogPGRlZnM+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXJHcmFkaWVudDg2MSIgeDE9IjQwLjQ4MSIgeDI9IjQwLjQ4MSIgeTE9IjkyLjYwNCIgeTI9Ii0uNTI5MTYiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoLjc3NzUxIC43Nzc1MSkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBzcHJlYWRNZXRob2Q9InJlcGVhdCI+CiAgIDxzdG9wIHN0b3AtY29sb3I9IiM3NTc1NzUiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmZmIiBvZmZzZXQ9IjEiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxmaWx0ZXIgaWQ9ImZpbHRlcjg3MSIgeD0iLS4wMTIiIHk9Ii0uMDEyIiB3aWR0aD0iMS4wMjQiIGhlaWdodD0iMS4wMjQiIGNvbG9yLWludGVycG9sYXRpb24tZmlsdGVycz0ic1JHQiI+CiAgIDxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjAuNDU0NTk0MDQiLz4KICA8L2ZpbHRlcj4KIDwvZGVmcz4KIDxwYXRoIGQ9Im05Mi4wMSA0Ni41NWE0NS40NTkgNDUuNDU5IDAgMCAxLTQ1LjQ1OSA0NS40NTkgNDUuNDU5IDQ1LjQ1OSAwIDAgMS00NS40NTktNDUuNDU5IDQ1LjQ1OSA0NS40NTkgMCAwIDEgNDUuNDU5LTQ1LjQ1OSA0NS40NTkgNDUuNDU5IDAgMCAxIDQ1LjQ1OSA0NS40NTl6IiBmaWxsPSJ1cmwoI2xpbmVhckdyYWRpZW50ODYxKSIgZmlsdGVyPSJ1cmwoI2ZpbHRlcjg3MSkiIHN0cm9rZT0iIzQ0N2U5YiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjEuODQ0MSIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz4KIDxnIHRyYW5zZm9ybT0ibWF0cml4KDE5LjQ3OSAwIDAgMTkuNDc5IDIzMDQuMiAtMjU0OS44KSI+CiAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoLjA0NDExNyAwIDAgLjA0NDExNyAtMTEyLjQxIDEyOS42MikiPgogICA8cGF0aCBkPSJtLTc5LjE1NiA4Ni4zNTEgMTcuNTQ4LTM4Ljc1NWgxOC45OTZsLTI3LjY4MyA1NC44MjR2MzEuMTkzaC0xNy42NjR2LTMxLjE5M2wtMjcuNjgzLTU0LjgyNGgxOS4wNTR6IiBmaWxsPSIjNDQ3ZTliIiBzdHJva2U9IiM0MTRjNTEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIzLjk0MjIiIHN0eWxlPSJwYWludC1vcmRlcjptYXJrZXJzIGZpbGwgc3Ryb2tlIi8+CiAgPC9nPgogPC9nPgogPGcgdHJhbnNmb3JtPSJtYXRyaXgoLjQ3NDIgLS44ODc2NiAuODY5NzkgLjQ4MDY0IDAgMCkiIGZpbGw9IiM0MTRjNTEiIHN0cm9rZT0iI2FkYWRhZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9Ii42NTY2OCIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiIGFyaWEtbGFiZWw9IkFUQSI+CiAgPHBhdGggZD0ibS0yNS4yODUgOTYuMDE1aC01LjkyNDNsLTEuMTI2MyAzLjM3ODloLTMuNTkyOWw2LjEwNDUtMTYuMzk5aDMuMTMxMWw2LjEzODMgMTYuMzk5aC0zLjU5Mjl6bS01LjAxMi0yLjczNjloNC4wOTk3bC0yLjA2MTEtNi4xMzgzeiIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz4KICA8cGF0aCBkPSJtLTguMDA4MiA4NS43MzJoLTUuMDIzMnYxMy42NjJoLTMuMzc4OXYtMTMuNjYyaC00Ljk1NTd2LTIuNzM2OWgxMy4zNTh6IiBzdHlsZT0icGFpbnQtb3JkZXI6bWFya2VycyBmaWxsIHN0cm9rZSIvPgogIDxwYXRoIGQ9Im0xLjgzNTUgOTYuMDE1aC01LjkyNDNsLTEuMTI2MyAzLjM3ODloLTMuNTkyOWw2LjEwNDUtMTYuMzk5aDMuMTMxMWw2LjEzODMgMTYuMzk5aC0zLjU5Mjl6bS01LjAxMi0yLjczNjloNC4wOTk3bC0yLjA2MTEtNi4xMzgzeiIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz4KIDwvZz4KPC9zdmc+Cg==
@@ -162,7 +164,7 @@ function gmFetch(url, config) {
             url,
             method: config?.method,
             headers: config?.headers,
-            data: config?.data,
+            data: config?.body,
             onload: (response) =>
                 resolve(
                     new Response(response.response, {
@@ -262,6 +264,16 @@ class MemoListener {
 
 // }}}
 
+// {{{ cache
+
+GM.getValue("state").then((value) => {
+    const frozen = value ? JSON.parse(value) : {};
+    frozen.hydrated = true;
+    reducer(frozen);
+});
+
+// }}}
+
 // {{{ state listeners
 
 const errorListener = new MemoListener(["error"], ({ error }) => {
@@ -357,13 +369,64 @@ const ocPlannerListener = new MemoListener(
     }
 );
 
-const yataListener = new MemoListener(
-    ["ocList", "ocPlanner", "data", "fetchingData"],
-    (props) => {
+const orderListener = new MemoListener(
+    ["ocPlanner", "prevOrder"],
+    ({ ocPlanner, prevOrder }) => {
+        if (!ocPlanner) return;
+
+        const plans = ocPlanner.querySelector(".plans-wrap");
+        const userIDs = [
+            ...plans.querySelectorAll("ul.item:not(.title) a"),
+        ].map((name) => parseInt(name.href.match(/[0-9]+/)[0]));
+
+        console.log(userIDs);
+
         if (
-            props.data ||
-            props.fetchingData ||
-            (!props.ocList && !props.ocPlanner)
+            userIDs.length === 0 ||
+            (prevOrder &&
+                userIDs.length == prevOrder.length &&
+                userIDs.every((id, index) => id === prevOrder[index]))
+        ) {
+            reducer({ orderState: "pulled" });
+        } else {
+            reducer({ orderState: "fetching", prevOrder: userIDs });
+            gmFetch(
+                `https://yata.alwaysdata.net/api/v1/faction/crimes/import/ranking/?key=${apiKey}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                    body: JSON.stringify({ sub_ranking: userIDs }),
+                }
+            ).then((response) => {
+                if (response.ok) {
+                    reducer({ orderState: "pushed" });
+                } else {
+                    response
+                        .json()
+                        .then((json) => reducer({ error: json.error.error }))
+                        .catch(() =>
+                            reducer({
+                                error: `YATA returned HTTP error ${response.status} "${response.state}"`,
+                            })
+                        );
+                }
+            });
+        }
+    }
+);
+
+const yataListener = new MemoListener(
+    ["timestamp", "orderState", "data", "error"],
+    ({ timestamp, orderState, data, error }) => {
+        if (
+            error ||
+            !orderState ||
+            orderState === "fetching" ||
+            (data &&
+                orderState === "pulled" &&
+                Date.now() - timestamp < 3600000)
         )
             return;
 
@@ -380,7 +443,13 @@ const yataListener = new MemoListener(
                         })
                     );
             } else {
-                return response.json().then((json) => reducer({ data: json }));
+                return response.json().then((json) =>
+                    reducer({
+                        data: json,
+                        timestamp: Date.now(),
+                        orderState: "pulled",
+                    })
+                );
             }
         });
 
@@ -388,7 +457,19 @@ const yataListener = new MemoListener(
     }
 );
 
-listeners.push(errorListener, ocListListener, ocPlannerListener, yataListener);
+const cacheListener = new MemoListener(
+    ["data", "timestamp", "prevOrder"],
+    (partial) => GM.setValue("state", JSON.stringify(partial))
+);
+
+listeners.push(
+    errorListener,
+    ocListListener,
+    ocPlannerListener,
+    orderListener,
+    yataListener,
+    cacheListener
+);
 
 //}}}
 
@@ -408,7 +489,7 @@ const crimeObserver = new MutationObserver((records) => {
         reducer({ ocList, ocPlanner });
 });
 
-crimeObserver.observe(document.querySelector("#factions"), {
+crimeObserver.observe(document.getElementById("factions"), {
     subtree: true,
     childList: true,
 });
