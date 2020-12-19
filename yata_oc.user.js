@@ -1,20 +1,21 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.alwaysdata.net
-// @version      1.0.0
+// @version      1.1.0
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
+// @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit [2111649]
 // @match        https://www.torn.com/factions.php*
+// @match        https://www.torn.com/preferences.php*
 // @grant        GM.xmlHttpRequest
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @connect      yata.alwaysdata.net
+// @connect      www.tornstats.com
 // @run-at       document-end
 // @icon64       data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTMuMTAxbW0iIGhlaWdodD0iOTMuMTAxbW0iIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDkzLjEwMSA5My4xMDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogPGRlZnM+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJsaW5lYXJHcmFkaWVudDg2MSIgeDE9IjQwLjQ4MSIgeDI9IjQwLjQ4MSIgeTE9IjkyLjYwNCIgeTI9Ii0uNTI5MTYiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoLjc3NzUxIC43Nzc1MSkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBzcHJlYWRNZXRob2Q9InJlcGVhdCI+CiAgIDxzdG9wIHN0b3AtY29sb3I9IiM3NTc1NzUiIG9mZnNldD0iMCIvPgogICA8c3RvcCBzdG9wLWNvbG9yPSIjZmZmIiBvZmZzZXQ9IjEiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxmaWx0ZXIgaWQ9ImZpbHRlcjg3MSIgeD0iLS4wMTIiIHk9Ii0uMDEyIiB3aWR0aD0iMS4wMjQiIGhlaWdodD0iMS4wMjQiIGNvbG9yLWludGVycG9sYXRpb24tZmlsdGVycz0ic1JHQiI+CiAgIDxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjAuNDU0NTk0MDQiLz4KICA8L2ZpbHRlcj4KIDwvZGVmcz4KIDxwYXRoIGQ9Im05Mi4wMSA0Ni41NWE0NS40NTkgNDUuNDU5IDAgMCAxLTQ1LjQ1OSA0NS40NTkgNDUuNDU5IDQ1LjQ1OSAwIDAgMS00NS40NTktNDUuNDU5IDQ1LjQ1OSA0NS40NTkgMCAwIDEgNDUuNDU5LTQ1LjQ1OSA0NS40NTkgNDUuNDU5IDAgMCAxIDQ1LjQ1OSA0NS40NTl6IiBmaWxsPSJ1cmwoI2xpbmVhckdyYWRpZW50ODYxKSIgZmlsdGVyPSJ1cmwoI2ZpbHRlcjg3MSkiIHN0cm9rZT0iIzQ0N2U5YiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjEuODQ0MSIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz4KIDxnIHRyYW5zZm9ybT0ibWF0cml4KDE5LjQ3OSAwIDAgMTkuNDc5IDIzMDQuMiAtMjU0OS44KSI+CiAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoLjA0NDExNyAwIDAgLjA0NDExNyAtMTEyLjQxIDEyOS42MikiPgogICA8cGF0aCBkPSJtLTc5LjE1NiA4Ni4zNTEgMTcuNTQ4LTM4Ljc1NWgxOC45OTZsLTI3LjY4MyA1NC44MjR2MzEuMTkzaC0xNy42NjR2LTMxLjE5M2wtMjcuNjgzLTU0LjgyNGgxOS4wNTR6IiBmaWxsPSIjNDQ3ZTliIiBzdHJva2U9IiM0MTRjNTEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIzLjk0MjIiIHN0eWxlPSJwYWludC1vcmRlcjptYXJrZXJzIGZpbGwgc3Ryb2tlIi8+CiAgPC9nPgogPC9nPgogPGcgdHJhbnNmb3JtPSJtYXRyaXgoLjQ3NDIgLS44ODc2NiAuODY5NzkgLjQ4MDY0IDAgMCkiIGZpbGw9IiM0MTRjNTEiIHN0cm9rZT0iI2FkYWRhZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9Ii42NTY2OCIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiIGFyaWEtbGFiZWw9IkFUQSI+CiAgPHBhdGggZD0ibS0yNS4yODUgOTYuMDE1aC01LjkyNDNsLTEuMTI2MyAzLjM3ODloLTMuNTkyOWw2LjEwNDUtMTYuMzk5aDMuMTMxMWw2LjEzODMgMTYuMzk5aC0zLjU5Mjl6bS01LjAxMi0yLjczNjloNC4wOTk3bC0yLjA2MTEtNi4xMzgzeiIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz4KICA8cGF0aCBkPSJtLTguMDA4MiA4NS43MzJoLTUuMDIzMnYxMy42NjJoLTMuMzc4OXYtMTMuNjYyaC00Ljk1NTd2LTIuNzM2OWgxMy4zNTh6IiBzdHlsZT0icGFpbnQtb3JkZXI6bWFya2VycyBmaWxsIHN0cm9rZSIvPgogIDxwYXRoIGQ9Im0xLjgzNTUgOTYuMDE1aC01LjkyNDNsLTEuMTI2MyAzLjM3ODloLTMuNTkyOWw2LjEwNDUtMTYuMzk5aDMuMTMxMWw2LjEzODMgMTYuMzk5aC0zLjU5Mjl6bS01LjAxMi0yLjczNjloNC4wOTk3bC0yLjA2MTEtNi4xMzgzeiIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz4KIDwvZz4KPC9zdmc+Cg==
 // ==/UserScript==
-
-const apiKey = "";
 
 // {{{ HTML DSL
 
@@ -26,14 +27,6 @@ class HTMLPrimitive {
         }
         this.attributes = attributes;
         this.value = value;
-
-        if (this.value === undefined) {
-            this.valueType = "empty";
-        } else if (Array.isArray(this.value)) {
-            this.valueType = "children";
-        } else {
-            this.valueType = "text";
-        }
     }
 
     render() {
@@ -50,20 +43,18 @@ class HTMLPrimitive {
             }
         });
 
-        switch (this.valueType) {
-            case "children":
-                this.value.forEach((child) => {
-                    if (child instanceof HTMLPrimitive) {
-                        element.appendChild(child.render());
-                    } else {
-                        element.appendChild(
-                            document.createTextNode(child.toString())
-                        );
-                    }
-                });
-                break;
-            case "text":
-                element.innerHTML = this.value.toString();
+        if (Array.isArray(this.value)) {
+            this.value.forEach((child) => {
+                if (child instanceof HTMLPrimitive) {
+                    element.appendChild(child.render());
+                } else {
+                    element.appendChild(
+                        document.createTextNode(child.toString())
+                    );
+                }
+            });
+        } else if (this.value !== undefined) {
+            element.innerHTML = this.value.toString();
         }
 
         return element;
@@ -80,12 +71,26 @@ function mount(anchor, position, components) {
     const [first, ...tail] = components.map((component) => component.render());
 
     anchor.insertAdjacentElement(position, first);
-    tail.forEach((component) =>
+    tail.reverse().forEach((component) =>
         first.insertAdjacentElement("afterend", component)
     );
 }
 
-const tags = ["none", "div", "li", "i", "style"];
+const tags = [
+    "none",
+    "div",
+    "li",
+    "i",
+    "style",
+    "form",
+    "input",
+    "button",
+    "label",
+    "br",
+    "h3",
+    "p",
+    "span",
+];
 
 Object.defineProperties(
     window,
@@ -150,6 +155,96 @@ mount(
 .yata-marker {
     display: none;
 }
+
+#yata-alert-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100010;
+}
+
+.yata-box {
+    background-color: white;
+    border-radius: 5px;
+    padding: 5px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.yata-box span {
+    flex-grow: 1;
+}
+
+.yata-alert-box {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    display: inline-block;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: 5px;
+    margin: 20px;
+    width: 300px;
+    padding: 15px;
+}
+
+.yata-alert-box h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.yata-alert-box p {
+    margin-bottom: 5px;
+}
+
+.yata-btn {
+    display: inline-block;
+    border: 1px solid transparent;
+    color: #fff;
+    border-radius: 0.25rem;
+}
+
+.yata-alert-box .yata-btn {
+    margin-right: 7px;
+    margin-top: 4px;
+}
+
+.yata-btn-primary {
+    background-color: #007bff;
+}
+
+.yata-btn-secondary {
+    background-color: #dc3545;
+}
+
+.yata-alert-box input {
+    margin-right: 5px;
+    vertical-align: text-top;
+}
+
+.yata-alert-box label {
+    vertical-align: middle;
+}
+
+.yata-warning {
+    color: red;
+}
+
+.yata-reset-btn {
+    margin-right: 5px;
+}
+
+.yata-row {
+    display: flex;
+    align-items: center;
+    margin: 4px 0 4px 0;
+}
 `
     )
 );
@@ -184,42 +279,41 @@ function gmFetch(url, config) {
     });
 }
 
-const map = (transform) => (arg) => {
-    if (arg === null || arg === undefined) return arg;
+const map = (transform, alt) => (arg) => {
+    if (arg === null || arg === undefined) return alt;
     return transform(arg);
 };
 
-// }}}
+function mergeData(yata, ts) {
+    const mapKeys = map(({ members }) => Object.keys(members), []);
+    const uids = new Set([...mapKeys(yata.data), ...mapKeys(ts.data)]);
 
-// {{{ components
-
-const nnbCol = ({ nnb, rank, ea }) => [
-    li({ class: "yata-nnb" }, [nnb, div({ class: "delimiter-white" })]),
-    li({ class: "yata-rank" }, [rank, div({ class: "delimiter-white" })]),
-    li({ class: "yata-ea" }, [ea, div({ class: "delimiter-white" })]),
-];
-
-const yataMessage = ({ color, message }) =>
-    div(
-        {
-            class: `info-msg-cont border-round yata-message ${color}`,
-            id: "yata-oc-message",
-        },
-        [
-            div({ class: "info-msg border-round" }, [
-                i({ class: "info-icon" }),
-                div({ class: "delimiter" }, [
-                    div({ class: "msg right-round" }, `YATA - OC: ${message}`),
-                ]),
-            ]),
-        ]
+    return new Map(
+        [...uids].map((userID) => [
+            userID,
+            {
+                nnb:
+                    yata?.data.members[userID]?.NNB ??
+                    ts?.data.members[userID]?.natural_nerve ??
+                    "-",
+                rank: yata?.data.members[userID]?.ce_rank ?? "-",
+                ea: yata?.data.members[userID]?.equivalent_arsons ?? "-",
+            },
+        ])
     );
+}
 
 // }}}
 
 // {{{ state management
 
-let state = {};
+let state = {
+    pathname: location.pathname,
+    settings: {
+        state: "fresh",
+    },
+};
+
 const listeners = [];
 
 function reducer(update) {
@@ -264,6 +358,122 @@ class MemoListener {
 
 // }}}
 
+// {{{ components
+
+const nnbCol = ({ nnb, rank, ea }) => [
+    li({ class: "yata-nnb" }, [nnb, div({ class: "delimiter-white" })]),
+    li({ class: "yata-rank" }, [rank, div({ class: "delimiter-white" })]),
+    li({ class: "yata-ea" }, [ea, div({ class: "delimiter-white" })]),
+];
+
+const yataMessage = ({ color, message }) =>
+    div(
+        {
+            class: `info-msg-cont border-round yata-message ${color}`,
+            id: "yata-oc-message",
+        },
+        [
+            div({ class: "info-msg border-round" }, [
+                i({ class: "info-icon" }),
+                div({ class: "delimiter" }, [
+                    div({ class: "msg right-round" }, `YATA - OC: ${message}`),
+                ]),
+            ]),
+        ]
+    );
+
+const apiKeyAlert = ({ apiKey }) =>
+    div({ id: "yata-alert-container" }, [
+        div({ class: "yata-alert-box" }, [
+            h3("YATA - OC"),
+            p("Select which sources to use to power the script:"),
+            form(
+                {
+                    id: "yata-sources",
+                    onSubmit: (event) => {
+                        const yata = event.target.elements.yata.checked;
+                        const ts = event.target.elements.ts.checked;
+                        reducer({
+                            settings: {
+                                state: "selected",
+                                apiKey,
+                                yata,
+                                ts,
+                            },
+                        });
+                        event.preventDefault();
+                    },
+                },
+                [
+                    div({ class: "yata-row" }, [
+                        label({ for: "yata" }, [
+                            input({
+                                type: "checkbox",
+                                name: "yata",
+                                checked: true,
+                            }),
+                            "YATA",
+                        ]),
+                    ]),
+                    div({ class: "yata-row" }, [
+                        label({ for: "ts" }, [
+                            input({ type: "checkbox", name: "ts" }),
+                            "TornStats",
+                        ]),
+                    ]),
+                ]
+            ),
+            p([
+                span({ class: "yata-warning" }, "WARNING:"),
+                " this will share your API key with the selected sites in order to authorize requests sent to them.",
+            ]),
+            div({ class: "yata-row" }, [
+                button(
+                    {
+                        class: "yata-btn yata-btn-secondary",
+                        onClick: () =>
+                            reducer({
+                                settings: {
+                                    state: "selected",
+                                    yata: false,
+                                    ts: false,
+                                },
+                            }),
+                    },
+                    "cancel"
+                ),
+                button(
+                    {
+                        class: "yata-btn yata-btn-primary",
+                        type: "submit",
+                        form: "yata-sources",
+                    },
+                    "confirm"
+                ),
+            ]),
+        ]),
+    ]);
+
+const apiPrefs = () =>
+    div({ class: "yata-box" }, [
+        span("YATA - OC"),
+        button(
+            {
+                class: "yata-btn yata-btn-secondary yata-reset-btn",
+                onClick: () =>
+                    reducer({
+                        settings: { state: "fresh" },
+                        yata: undefined,
+                        ts: undefined,
+                        orderState: undefined,
+                    }),
+            },
+            "reset"
+        ),
+    ]);
+
+// }}}
+
 // {{{ cache
 
 GM.getValue("state").then((value) => {
@@ -272,9 +482,16 @@ GM.getValue("state").then((value) => {
     reducer(frozen);
 });
 
+const cacheListener = new MemoListener(
+    ["settings", "yata", "ts", "prevOrder"],
+    (partial) => GM.setValue("state", JSON.stringify(partial))
+);
+
+listeners.push(cacheListener);
+
 // }}}
 
-// {{{ state listeners
+// {{{ OC page
 
 const errorListener = new MemoListener(["error"], ({ error }) => {
     if (error !== undefined) {
@@ -292,9 +509,13 @@ const errorListener = new MemoListener(["error"], ({ error }) => {
 });
 
 const ocListListener = new MemoListener(
-    ["ocList", "data"],
-    ({ ocList, data }) => {
-        if (!data || !ocList || ocList.querySelector(".yata-marker") !== null)
+    ["ocList", "yata", "ts"],
+    ({ ocList, yata, ts }) => {
+        if (
+            (!yata && !ts) ||
+            !ocList ||
+            ocList.querySelector(".yata-marker") !== null
+        )
             return;
         mount(ocList, "afterbegin", div({ class: "yata-marker" }));
 
@@ -308,20 +529,14 @@ const ocListListener = new MemoListener(
             );
         });
 
+        const data = mergeData(yata, ts);
         [...ocList.querySelectorAll("ul.details-list ul.item")].forEach(
             (item) => {
                 const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
                 mount(
                     item.querySelector(".level"),
                     "afterend",
-                    nnbCol({
-                        nnb: data.members[userID]?.NNB ?? "-",
-                        rank:
-                            map((rank) => "#" + rank)(
-                                data.members[userID]?.ce_rank
-                            ) ?? "-",
-                        ea: data.members[userID]?.equivalent_arsons ?? "-",
-                    })
+                    nnbCol(data.get(userID) ?? { nnb: "-", rank: "-", ea: "-" })
                 );
             }
         );
@@ -329,10 +544,10 @@ const ocListListener = new MemoListener(
 );
 
 const ocPlannerListener = new MemoListener(
-    ["ocPlanner", "data"],
-    ({ ocPlanner, data }) => {
+    ["ocPlanner", "yata", "ts"],
+    ({ ocPlanner, yata, ts }) => {
         if (
-            !data ||
+            (!yata && !ts) ||
             !ocPlanner ||
             ocPlanner.querySelector(".yata-marker") !== null
         )
@@ -349,6 +564,7 @@ const ocPlannerListener = new MemoListener(
             }
         );
 
+        const data = mergeData(yata, ts);
         [
             ...ocPlanner.querySelectorAll(".plans-list ul.item:not(.title)"),
         ].forEach((item) => {
@@ -356,23 +572,16 @@ const ocPlannerListener = new MemoListener(
             mount(
                 item.querySelector(".offences"),
                 "afterend",
-                nnbCol({
-                    nnb: data.members[userID]?.NNB ?? "-",
-                    rank:
-                        map((rank) => "#" + rank)(
-                            data.members[userID]?.ce_rank
-                        ) ?? "-",
-                    ea: data.members[userID]?.equivalent_arsons ?? "-",
-                })
+                nnbCol(data.get(userID) ?? { nnb: "-", rank: "-", ea: "-" })
             );
         });
     }
 );
 
 const orderListener = new MemoListener(
-    ["ocPlanner", "prevOrder"],
-    ({ ocPlanner, prevOrder }) => {
-        if (!ocPlanner) return;
+    ["ocPlanner", "prevOrder", "settings"],
+    ({ ocPlanner, prevOrder, settings: { yata, apiKey } }) => {
+        if (!ocPlanner || !yata) return;
 
         const plans = ocPlanner.querySelector(".plans-wrap");
         const userIDs = [
@@ -389,7 +598,7 @@ const orderListener = new MemoListener(
         ) {
             reducer({ orderState: "pulled" });
         } else {
-            reducer({ orderState: "fetching", prevOrder: userIDs });
+            reducer({ orderState: "pushing", prevOrder: userIDs });
             gmFetch(
                 `https://yata.alwaysdata.net/api/v1/faction/crimes/import/ranking/?key=${apiKey}`,
                 {
@@ -417,49 +626,20 @@ const orderListener = new MemoListener(
     }
 );
 
-const yataListener = new MemoListener(
-    ["timestamp", "orderState", "data", "error"],
-    ({ timestamp, orderState, data, error }) => {
+const redirectListener = new MemoListener(
+    ["hydrated", "settings", "pathname"],
+    ({ hydrated, settings, pathname }) => {
         if (
-            error ||
-            !orderState ||
-            orderState === "fetching" ||
-            (data &&
-                orderState === "pulled" &&
-                Date.now() - timestamp < 3600000)
-        )
-            return;
-
-        gmFetch(
-            `https://yata.alwaysdata.net/api/v1/faction/crimes/export/?key=${apiKey}`
-        ).then((response) => {
-            if (!response.ok) {
-                return response
-                    .json()
-                    .then((json) => reducer({ error: json.error.error }))
-                    .catch(() =>
-                        reducer({
-                            error: `YATA returned HTTP error ${response.status} "${response.state}"`,
-                        })
-                    );
-            } else {
-                return response.json().then((json) =>
-                    reducer({
-                        data: json,
-                        timestamp: Date.now(),
-                        orderState: "pulled",
-                    })
-                );
-            }
-        });
-
-        reducer({ fetchingData: true });
+            hydrated &&
+            pathname !== "/preferences.php" &&
+            settings.state === "fresh" &&
+            confirm(
+                "The YATA - OC userscript isn't linked to your account yet. Do you want to do that now?"
+            )
+        ) {
+            location.href = "https://www.torn.com/preferences.php#tab=api";
+        }
     }
-);
-
-const cacheListener = new MemoListener(
-    ["data", "timestamp", "prevOrder"],
-    (partial) => GM.setValue("state", JSON.stringify(partial))
 );
 
 listeners.push(
@@ -467,11 +647,39 @@ listeners.push(
     ocListListener,
     ocPlannerListener,
     orderListener,
-    yataListener,
-    cacheListener
+    redirectListener
 );
 
 //}}}
+
+// {{{ pref page
+
+const prefListener = new MemoListener(["apiKey"], ({ apiKey }) => {
+    if (apiKey) {
+        mount(
+            document.querySelector(".preferences-wrap"),
+            "afterend",
+            apiPrefs()
+        );
+    }
+});
+
+const modalListener = new MemoListener(
+    ["apiKey", "settings"],
+    ({ apiKey, settings }) => {
+        if (apiKey && settings.state === "fresh") {
+            mount(document.body, "afterbegin", apiKeyAlert({ apiKey }));
+        } else {
+            map((container) => container.parentNode.removeChild(container))(
+                document.getElementById("yata-alert-container")
+            );
+        }
+    }
+);
+
+listeners.push(modalListener, prefListener);
+
+// }}}
 
 // {{{ DOM interaction
 
@@ -485,14 +693,118 @@ const crimeObserver = new MutationObserver((records) => {
         (node) => node.classList?.contains("faction-crimes-wrap") ?? false
     );
 
-    if ((ocList !== undefined, ocPlanner !== undefined))
+    if (ocList !== undefined || ocPlanner !== undefined)
         reducer({ ocList, ocPlanner });
 });
 
-crimeObserver.observe(document.getElementById("factions"), {
-    subtree: true,
-    childList: true,
+const observerListener = new MemoListener(["pathname"], ({ pathname }) => {
+    if (pathname === "/factions.php") {
+        crimeObserver.observe(document.getElementById("factions"), {
+            subtree: true,
+            childList: true,
+        });
+    } else if (pathname === "/preferences.php") {
+        const oldFetch = fetch;
+        unsafeWindow.fetch = function () {
+            if (arguments[0].indexOf("ajax=getApiData") === -1) {
+                return oldFetch.apply(this, arguments);
+            }
+
+            return new Promise((resolve, reject) =>
+                oldFetch
+                    .apply(this, arguments)
+                    .then((response) => {
+                        resolve(response.clone());
+                        response
+                            .json()
+                            .then((json) => reducer({ apiKey: json.apiKey }));
+                    })
+                    .catch(reject)
+            );
+        };
+    } else {
+        crimeObserver.disconnect();
+    }
 });
+
+listeners.push(observerListener);
+
+// }}}
+
+// {{{ APIs
+
+const yataListener = new MemoListener(
+    ["orderState", "yata", "error", "settings"],
+    ({ orderState, yata, error, settings }) => {
+        if (
+            !settings.yata ||
+            error ||
+            (orderState && ["pushing", "pulling"].includes(orderState)) ||
+            (yata?.timestamp &&
+                orderState === "pulled" &&
+                Date.now() - yata.timestamp < 3600000)
+        )
+            return;
+
+        gmFetch(
+            `https://yata.alwaysdata.net/api/v1/faction/crimes/export/?key=${settings.apiKey}`
+        ).then((response) => {
+            if (!response.ok) {
+                return response
+                    .json()
+                    .then((json) => reducer({ error: json.error.error }))
+                    .catch(() =>
+                        reducer({
+                            error: `YATA returned HTTP error ${response.status} "${response.state}"`,
+                        })
+                    );
+            } else {
+                return response.json().then((json) =>
+                    reducer({
+                        yata: { data: json, timestamp: Date.now() },
+                        orderState: "pulled",
+                    })
+                );
+            }
+        });
+        reducer({ orderState: "pulling" });
+    }
+);
+
+const tsListener = new MemoListener(
+    ["ts", "error", "settings"],
+    ({ ts, error, settings }) => {
+        if (
+            !settings.ts ||
+            error ||
+            (ts?.timestamp && Date.now() - ts.timestamp < 3600000)
+        )
+            return;
+
+        gmFetch(
+            `https://www.tornstats.com/api.php?action=crimes&key=${settings.apiKey}`
+        ).then((response) => {
+            if (!response.ok) {
+                return response
+                    .json()
+                    .then((json) => reducer({ error: json.error.error }))
+                    .catch(() =>
+                        reducer({
+                            error: `TornStats returned HTTP error ${response.status} "${response.state}"`,
+                        })
+                    );
+            } else {
+                return response.json().then((json) =>
+                    reducer({
+                        ts: { data: json, timestamp: Date.now() },
+                    })
+                );
+            }
+        });
+    }
+);
+
+listeners.push(yataListener, tsListener);
 
 // }}}
 
