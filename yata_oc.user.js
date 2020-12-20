@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.alwaysdata.net
-// @version      1.1.1
+// @version      1.1.2
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -298,7 +298,7 @@ const map = (transform, alt) => (arg) => {
 
 function mergeData(yata, ts) {
     const mapKeys = map(({ members }) => Object.keys(members), []);
-    const uids = new Set([...mapKeys(yata.data), ...mapKeys(ts.data)]);
+    const uids = new Set([...mapKeys(yata?.data), ...mapKeys(ts?.data)]);
 
     const mapYATAnnb = map((nnb) => div([nnb, i({ class: "yata-icon" })]));
     const mapTSnnb = map(
