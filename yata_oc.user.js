@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      1.1.3
+// @version      1.1.4
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -302,7 +302,7 @@ function mergeData(yata, ts) {
 
     const mapYATAnnb = map((nnb) => div([nnb, i({ class: "yata-icon" })]));
     const mapTSnnb = map(
-        (member) => `${member.natural_nerve}${member.verified ? "" : "*"}`,
+        (member) => `${member.natural_nerve}${member.verified ? "" : "*"} (TS)`,
         "-"
     );
 
