@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      1.1.4
+// @version      2.0.0
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -13,9 +13,43 @@
 // @grant        GM.getValue
 // @connect      yata.yt
 // @connect      www.tornstats.com
+// @require      https://unpkg.com/rxjs@6.6.3/bundles/rxjs.umd.min.js#sha256=5b57748e6106387c0c1ecc830f7ade320585f5c709efa1e13584e423e21c37fe
 // @run-at       document-end
 // @icon64       data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAxMzUuNDcgMTM1LjQ3IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIHRyYW5zZm9ybT0ibWF0cml4KC45OTkwOSAwIDAgLjk5OTk4IDQuNzk1NmUtNiAtMi4zNTg4ZS03KSI+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1IDQ2LjE0NCkiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQuMDg4OWUtNiAxLjg1MjEpIj48cmVjdCB4PSItMTE0Ljg4IiB5PSItNDcuOTk2IiB3aWR0aD0iMTM1LjQ3IiBoZWlnaHQ9IjEzNS40NyIgZmlsbD0iI2IzYjNiMyIgc3R5bGU9InBhaW50LW9yZGVyOm5vcm1hbCIvPjxwYXRoIGQ9Im0tMTE0Ljc4LTQ3Ljk5M2gxMzUuMjVzLTEzNC43NSAxMzYuNDYtMTM1LjI1IDEzNS40NmMtMC40OTc3Mi0wLjk5NzAyIDAtMTM1LjQ2IDAtMTM1LjQ2eiIgZmlsbD0iIzQ0N2U5YiIvPjwvZz48L2c+PGcgdHJhbnNmb3JtPSJtYXRyaXgoMS4yMzU0IDAgMCAxLjI0MjYgLTI2LjMyMSAtMjMuMDY4KSI+PHBhdGggdHJhbnNmb3JtPSJtYXRyaXgoMS4wNiAwIDAgMS4wNTM5IC00LjI5ODYgLTYuODEzMikiIGQ9Im0xMjEuMzggNzUuODAzYTQ1LjQ1OSA0NS40NTkgMCAwIDEtNDUuNDU5IDQ1LjQ1OSA0NS40NTkgNDUuNDU5IDAgMCAxLTQ1LjQ1OS00NS40NTkgNDUuNDU5IDQ1LjQ1OSAwIDAgMSA0NS40NTktNDUuNDU5IDQ1LjQ1OSA0NS40NTkgMCAwIDEgNDUuNDU5IDQ1LjQ1OXoiIGZpbGw9IiMzNjM2MzYiIHN0eWxlPSJwYWludC1vcmRlcjptYXJrZXJzIGZpbGwgc3Ryb2tlIi8+PC9nPjxnIHRyYW5zZm9ybT0ibWF0cml4KC45OTI3NCAwIDAgLjk3MzUyIC03LjQxNTIgLTExLjE2NCkiIHN0cm9rZT0iIzM2MzYzNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49ImJldmVsIiBzdHJva2Utd2lkdGg9IjEuNjExOCIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiPjxwYXRoIHRyYW5zZm9ybT0ibWF0cml4KDEuMjM1NCAwIDAgMS4yNDI2IC0xOC4xOTIgLTEzLjE0NykiIGQ9Im03Ni4wNDggNzUuOCAxNS4wOC0zMy4zMDRoMTYuMzI0bC0yMy43OSA0Ny4xMTN2MjYuODA2aC0xNS4xOHYtMjYuODA2bC0yMy43OS00Ny4xMTNoMTYuMzc0eiIgZmlsbD0iI2IzYjNiMyIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz48cGF0aCB0cmFuc2Zvcm09Im1hdHJpeCgxLjIzNTQgMCAwIDEuMjQyNiAtMTguMTkyIC0xMy4xNDcpIiBkPSJtNjguNDgzIDg5LjYwOS00LjQxMzQtOC45MjU4YzAuODg0NjYtOC4wMjY0IDEuOTIzOC05LjIxNjggOC40ODk2LTEyLjI4MmwzLjUxODEgNy43NDQzIDQuNzgyMi0xMC4wNTZzNi43NTc2LTIuNTg4IDExLjMzNy04LjQ5MTRjNC4zMzIzLTUuNTg1MyA0LjMyNDktMTUuMzIxIDQuMzI0OS0xNS4zMjFsMTAuOTMxIDAuMjE4NzEtMjMuNzkgNDcuMTEzdjI2LjgwNmgtMTUuMThjMy4zMWUtNCAtOC4wMDQgMC0yNi44MDYgMC0yNi44MDZ6IiBmaWxsPSIjNDQ3ZTliIiBzdHlsZT0icGFpbnQtb3JkZXI6bWFya2VycyBmaWxsIHN0cm9rZSIvPjwvZz48ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLjQwNjggLS4wNTY0NDcgLjA2NDk1OSAxLjMxMDEgLTM5LjM1NyAtMjQuMDY2KSIgZmlsbD0iIzQ0N2U5YiI+PHBhdGggZD0ibTk0Ljk1MiA5NC4yMDQtMi44MDkzIDUuMjU4OCAyLjQwNDggMi42MjM4LTEuNzAzOCAzLjE4OTMtMTEuMzY5LTEzLjMwMSAxLjQ4NDgtMi43Nzk0IDE3LjE3NCAyLjQzMzMtMS43MDM4IDMuMTg5M3ptLTQuNzU3MiAzLjEzMzUgMS45NDQxLTMuNjM5MS02LjMxNjQtMS4xMjA4eiIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz48cGF0aCBkPSJtOTQuMiA3My45MjYtMi4zODIgNC40NTg5IDExLjg4MyA2LjU2NjUtMS42MDIzIDIuOTk5My0xMS44ODMtNi41NjY1LTIuMzUgNC4zOTktMi4zODA1LTEuMzE1NSA2LjMzNDQtMTEuODU3eiIgc3R5bGU9InBhaW50LW9yZGVyOm1hcmtlcnMgZmlsbCBzdHJva2UiLz48cGF0aCBkPSJtMTA3LjgxIDcwLjEzLTIuODA5MyA1LjI1ODggMi40MDQ4IDIuNjIzOC0xLjcwMzggMy4xODkzLTExLjM2OS0xMy4zMDEgMS40ODQ4LTIuNzc5NCAxNy4xNzQgMi40MzMzLTEuNzAzOCAzLjE4OTN6bS00Ljc1NzIgMy4xMzM1IDEuOTQ0MS0zLjYzOTEtNi4zMTY0LTEuMTIwOHoiIHN0eWxlPSJwYWludC1vcmRlcjptYXJrZXJzIGZpbGwgc3Ryb2tlIi8+PC9nPjwvZz48L3N2Zz4K
 // ==/UserScript==
+
+// {{{ imports
+
+const {
+    Subject,
+    BehaviorSubject,
+    combineLatest,
+    from,
+    of,
+    fromEventPattern,
+    merge,
+} = rxjs;
+
+const {
+    filter,
+    map,
+    mapTo,
+    flatMap,
+    switchMapTo,
+    withLatestFrom,
+    pairwise,
+    tap,
+    pluck,
+    distinctUntilChanged,
+    groupBy,
+    first,
+    multicast,
+    refCount,
+    catchError,
+    delay,
+} = rxjs.operators;
+
+// }}}
 
 // {{{ HTML DSL
 
@@ -64,20 +98,33 @@ class HTMLPrimitive {
 const createFactory = (tag) => (attributes, value) =>
     new HTMLPrimitive(tag, attributes, value);
 
-function mount(anchor, position, components) {
-    if (!Array.isArray(components)) {
-        components = [components];
+function mount(anchor, position, elements) {
+    if (!Array.isArray(elements)) {
+        elements = [elements];
     }
-    const [first, ...tail] = components.map((component) => component.render());
+    const nodes = elements.map((element) => element.render());
+    const [first, ...tail] = nodes;
+
+    if (!first) return;
 
     anchor.insertAdjacentElement(position, first);
-    tail.reverse().forEach((component) =>
-        first.insertAdjacentElement("afterend", component)
+    tail.reverse().forEach((node) =>
+        first.insertAdjacentElement("afterend", node)
     );
+
+    return () => nodes.forEach((node) => node.parentNode?.removeChild(node));
+}
+
+function mountStream(anchor$, dom$, position) {
+    return combineLatest(anchor$, dom$)
+        .pipe(
+            map(([anchor, component]) => mount(anchor, position, component)),
+            pairwise()
+        )
+        .subscribe({ next: ([unmount, _]) => unmount && unmount() });
 }
 
 const tags = [
-    "none",
     "div",
     "li",
     "i",
@@ -291,97 +338,134 @@ function gmFetch(url, config) {
     });
 }
 
-const map = (transform, alt) => (arg) => {
-    if (arg === null || arg === undefined) return alt;
-    return transform(arg);
-};
+// }}}
 
-function mergeData(yata, ts) {
-    const mapKeys = map(({ members }) => Object.keys(members), []);
-    const uids = new Set([...mapKeys(yata?.data), ...mapKeys(ts?.data)]);
+// {{{ APIs
 
-    const mapYATAnnb = map((nnb) => div([nnb, i({ class: "yata-icon" })]));
-    const mapTSnnb = map(
-        (member) => `${member.natural_nerve}${member.verified ? "" : "*"} (TS)`,
-        "-"
-    );
+const yataAPI = (key, path, config) =>
+    gmFetch(`https://yata.yt/api/v1/${path}/?key=${key}`, config)
+        .catch(({ message }) => {
+            throw { message, code: -1, source: "YATA" };
+        })
+        .then((response) => {
+            if (response.headers.get("Content-Type") === "application/json") {
+                return response
+                    .json()
+                    .then((body) => {
+                        if (response.ok) {
+                            return body;
+                        } else {
+                            throw {
+                                message: body.error.error,
+                                code: body.error.code,
+                            };
+                        }
+                    })
+                    .catch(({ message, code }) => {
+                        throw {
+                            message: message ?? response.statusText,
+                            code: code ?? response.status,
+                            source: "YATA",
+                        };
+                    });
+            } else {
+                if (response.ok) {
+                    return;
+                } else {
+                    throw {
+                        message: response.statusText,
+                        code: response.status,
+                    };
+                }
+            }
+        });
 
-    return new Map(
-        [...uids].map((userID) => [
-            userID,
-            {
-                nnb:
-                    mapYATAnnb(yata?.data.members[userID]?.NNB) ??
-                    mapTSnnb(ts?.data.members[userID]),
-                rank: yata?.data.members[userID]?.ce_rank ?? "-",
-                ea: yata?.data.members[userID]?.equivalent_arsons ?? "-",
-            },
-        ])
-    );
-}
+const tsAPI = (key, action, config) =>
+    gmFetch(
+        `https://www.tornstats.com/api.php?action=${action}&key=${key}`,
+        config
+    )
+        .catch(({ message }) => {
+            throw { message, code: -1, source: "TornStats" };
+        })
+        .then((response) =>
+            response
+                .json()
+                .then((body) => {
+                    if (response.ok) {
+                        return body;
+                    } else {
+                        throw {
+                            message: error,
+                            code: response.status,
+                        };
+                    }
+                })
+                .catch(({ message, code }) => {
+                    throw {
+                        message: message ?? response.statusText,
+                        code: code ?? response.status,
+                        source: "TornStats",
+                    };
+                })
+        );
 
 // }}}
 
 // {{{ state management
 
-let state = {
-    pathname: location.pathname,
+const initialState = {
     settings: {
         state: "fresh",
     },
 };
 
-const listeners = [];
+const state$ = new BehaviorSubject(initialState);
 
-function reducer(update) {
-    state = { ...state, ...update };
-    console.debug(state, update);
-    listeners.forEach((listener) => listener.handler(state));
-}
+const sinkProxy$ = new Subject();
 
-function shallowCompare(newObj, prevObj) {
-    if (Object.keys(newObj).count !== Object.keys(prevObj).count) return false;
+sinkProxy$
+    .pipe(
+        withLatestFrom(state$),
+        map(([reducer, state]) => reducer(state))
+    )
+    .subscribe(state$);
 
-    if (Object.keys(newObj).length === 0) return true;
+const sink$ = { next: (reducer) => sinkProxy$.next(reducer) };
 
-    for (const key in newObj) {
-        if (newObj[key] !== prevObj[key]) return false;
-    }
-
-    return true;
-}
-
-function pick(object, keys) {
-    return Object.fromEntries(
-        Object.entries(object).filter(([key]) => keys.includes(key))
-    );
-}
-
-class MemoListener {
-    constructor(propKeys, body) {
-        this.propKeys = propKeys;
-        this.body = body;
-    }
-
-    handler(state) {
-        const props = pick(state, this.propKeys);
-
-        if (this.prevProps && shallowCompare(props, this.prevProps)) return;
-
-        this.prevProps = props;
-        this.body(props);
-    }
-}
+state$.subscribe({
+    next: console.log,
+    complete: console.log("state stream complete"),
+});
 
 // }}}
 
 // {{{ components
 
-const nnbCol = ({ nnb, rank, ea }) => [
+const nnbRow = ({ nnb, rank, ea }) => [
     li({ class: "yata-nnb" }, [nnb, div({ class: "delimiter-white" })]),
     li({ class: "yata-rank" }, [rank, div({ class: "delimiter-white" })]),
     li({ class: "yata-ea" }, [ea, div({ class: "delimiter-white" })]),
 ];
+
+const dataRow = ({ nnb, rank, ea, verified, source }) => {
+    switch (source) {
+        case "YATA":
+            return nnbRow({
+                nnb: nnb ? div([nnb, i({ class: "yata-icon" })]) : "-",
+                rank: rank ?? "-",
+                ea: ea ?? "-",
+            });
+        case "TS":
+            return nnbRow({
+                nnb: nnb ? `${nnb}${verified ? "" : "*"}  (TS)` : "-",
+                rank: "-",
+                ea: "-",
+            });
+        default:
+            return nnbRow({ nnb: "-", rank: rank ?? "-", ea: ea ?? "-" });
+    }
+};
 
 const yataMessage = ({ color, message }) =>
     div(
@@ -399,7 +483,7 @@ const yataMessage = ({ color, message }) =>
         ]
     );
 
-const apiKeyAlert = ({ apiKey }) =>
+const apiKeyAlert = (apiKey) =>
     div({ id: "yata-alert-container" }, [
         div({ class: "yata-alert-box" }, [
             h3("YATA - OC"),
@@ -410,14 +494,15 @@ const apiKeyAlert = ({ apiKey }) =>
                     onSubmit: (event) => {
                         const yata = event.target.elements.yata.checked;
                         const ts = event.target.elements.ts.checked;
-                        reducer({
+                        sink$.next((state) => ({
+                            ...state,
                             settings: {
                                 state: "selected",
                                 apiKey,
                                 yata,
                                 ts,
                             },
-                        });
+                        }));
                         event.preventDefault();
                     },
                 },
@@ -449,13 +534,14 @@ const apiKeyAlert = ({ apiKey }) =>
                     {
                         class: "yata-btn yata-btn-secondary",
                         onClick: () =>
-                            reducer({
+                            sink$.next((state) => ({
+                                ...state,
                                 settings: {
                                     state: "selected",
                                     yata: false,
                                     ts: false,
                                 },
-                            }),
+                            })),
                     },
                     "cancel"
                 ),
@@ -477,14 +563,16 @@ const apiPrefs = () =>
         button(
             {
                 class: "yata-btn yata-btn-secondary yata-reset-btn",
-                onClick: () =>
-                    reducer({
-                        settings: { state: "fresh" },
-                        yata: undefined,
-                        ts: undefined,
-                        prevOrder: undefined,
-                        orderState: undefined,
-                    }),
+                onClick: () => {
+                    const reducer$ = of(({ apiKey }) => ({
+                        ...initialState,
+                        apiKey,
+                    }));
+                    reducer$.subscribe(sink$);
+                    reducer$.pipe(delay(200)).subscribe({
+                        complete: () => (location.hash = "#tab=api"),
+                    });
+                },
             },
             "reset"
         ),
@@ -494,335 +582,348 @@ const apiPrefs = () =>
 
 // {{{ cache
 
-GM.getValue("state").then((value) => {
-    const frozen = value ? JSON.parse(value) : {};
-    frozen.hydrated = true;
-    reducer(frozen);
-});
+from(GM.getValue("state"))
+    .pipe(
+        map(JSON.parse),
+        filter((state) => state !== null),
+        map((state) => (prev) => ({ ...prev, ...state, hydrated: true }))
+    )
+    .subscribe(sink$);
 
-const cacheListener = new MemoListener(
-    ["settings", "yata", "ts", "prevOrder", "orderState"],
-    (partial) => GM.setValue("state", JSON.stringify(partial))
-);
-
-listeners.push(cacheListener);
+state$
+    .pipe(
+        map(({ settings, yata, ts, order }) => ({
+            settings,
+            yata,
+            ts,
+            order,
+        }))
+    )
+    .subscribe({
+        next: (value) => GM.setValue("state", JSON.stringify(value)),
+    });
 
 // }}}
 
 // {{{ OC page
 
-const errorListener = new MemoListener(["error"], ({ error }) => {
-    if (error !== undefined) {
-        const old = document.getElementById("yata-oc-message");
-        if (old) {
-            old.parentNode.removeChild(old);
-        }
+const yataData$ = state$.pipe(pluck("yata"), distinctUntilChanged());
 
-        mount(
-            document.querySelector("#faction-main"),
-            "beforebegin",
-            yataMessage({ message: error, color: "red" })
-        );
-    }
-});
+const tsData$ = state$.pipe(pluck("ts"), distinctUntilChanged());
 
-const ocListListener = new MemoListener(
-    ["ocList", "yata", "ts"],
-    ({ ocList, yata, ts }) => {
-        if (
-            (!yata && !ts) ||
-            !ocList ||
-            ocList.querySelector(".yata-marker") !== null
-        )
-            return;
-        mount(ocList, "afterbegin", div({ class: "yata-marker" }));
-
-        [
-            ...ocList.querySelectorAll("ul.details-list ul.title > .level"),
-        ].forEach((title) => {
-            mount(
-                title,
-                "afterend",
-                nnbCol({ nnb: "NNB", rank: "rank", ea: "EA" })
-            );
-        });
-
-        const data = mergeData(yata, ts);
-        [...ocList.querySelectorAll("ul.details-list ul.item")].forEach(
-            (item) => {
-                const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
-                mount(
-                    item.querySelector(".level"),
-                    "afterend",
-                    nnbCol(data.get(userID) ?? { nnb: "-", rank: "-", ea: "-" })
-                );
-            }
-        );
-    }
-);
-
-const ocPlannerListener = new MemoListener(
-    ["ocPlanner", "yata", "ts"],
-    ({ ocPlanner, yata, ts }) => {
-        if (
-            (!yata && !ts) ||
-            !ocPlanner ||
-            ocPlanner.querySelector(".yata-marker") !== null
-        )
-            return;
-        mount(ocPlanner, "afterbegin", div({ class: "yata-marker" }));
-
-        [...ocPlanner.querySelectorAll("ul.title .offences")].forEach(
-            (offences) => {
-                mount(
-                    offences,
-                    "afterend",
-                    nnbCol({ nnb: "NNB", rank: "rank", ea: "EA" })
-                );
-            }
+const data$ = combineLatest(yataData$, tsData$).pipe(
+    map(([yata, ts]) => {
+        const keys = new Set(
+            Object.keys(yata?.data?.members ?? {}).concat(
+                Object.keys(ts?.data?.members ?? {})
+            )
         );
 
-        const data = mergeData(yata, ts);
-        [
-            ...ocPlanner.querySelectorAll(".plans-list ul.item:not(.title)"),
-        ].forEach((item) => {
-            const userID = item.querySelector("a").href.match(/[0-9]+/)[0];
-            mount(
-                item.querySelector(".offences"),
-                "afterend",
-                nnbCol(data.get(userID) ?? { nnb: "-", rank: "-", ea: "-" })
-            );
-        });
-    }
-);
-
-const orderListener = new MemoListener(
-    ["ocPlanner", "prevOrder", "settings"],
-    ({ ocPlanner, prevOrder, settings: { yata, apiKey } }) => {
-        if (!ocPlanner || !yata) return;
-
-        const plans = ocPlanner.querySelector(".plans-wrap");
-        const userIDs = [
-            ...plans.querySelectorAll("ul.item:not(.title) a"),
-        ].map((name) => parseInt(name.href.match(/[0-9]+/)[0]));
-
-        console.log(userIDs);
-
-        if (
-            userIDs.length === 0 ||
-            (prevOrder &&
-                userIDs.length == prevOrder.length &&
-                userIDs.every((id, index) => id === prevOrder[index]))
-        ) {
-            reducer({ orderState: "pulled" });
-        } else {
-            reducer({ orderState: "pushing", prevOrder: userIDs });
-            gmFetch(
-                `https://yata.yt/api/v1/faction/crimes/import/ranking/?key=${apiKey}`,
+        return Object.fromEntries(
+            [...keys].map((key) => [
+                key,
                 {
+                    nnb:
+                        yata?.data?.members[key]?.NNB ??
+                        ts?.data?.members[key]?.natural_nerve,
+                    rank: yata?.data?.members[key]?.ce_rank,
+                    ea: yata?.data?.members[key]?.equivalent_arsons,
+                    source: yata?.data?.members[key]?.NNB
+                        ? "YATA"
+                        : ts?.data?.members[key]?.natural_nerve
+                        ? "TS"
+                        : undefined,
+                    verified: ts?.data?.members[key]?.verified,
+                },
+            ])
+        );
+    }),
+    multicast(() => new BehaviorSubject()),
+    refCount()
+);
+
+const ocList$ = state$.pipe(
+    pluck("ocList"),
+    distinctUntilChanged(),
+    filter((list) => list !== undefined)
+);
+
+ocList$
+    .pipe(
+        flatMap((list) =>
+            from([
+                ...list.querySelectorAll("ul.details-list ul.title > .level"),
+            ])
+        )
+    )
+    .subscribe({
+        next: (header) =>
+            mount(
+                header,
+                "afterend",
+                nnbRow({ nnb: "NNB", rank: "rank", ea: "EA" })
+            ),
+    });
+
+ocList$
+    .pipe(
+        flatMap((list) =>
+            from([...list.querySelectorAll("ul.details-list ul.item")])
+        ),
+        groupBy((item) => item.querySelector("a").href.match(/[0-9]+/)[0])
+    )
+    .subscribe({
+        next: (item$) => {
+            const info$ = data$.pipe(
+                pluck(item$.key),
+                distinctUntilChanged(),
+                filter((data) => data !== undefined),
+                map(dataRow)
+            );
+
+            const level$ = item$.pipe(
+                map((item) => item.querySelector(".level"))
+            );
+
+            mountStream(level$, info$, "afterend");
+        },
+    });
+
+const ocPlanner$ = state$.pipe(
+    pluck("ocPlanner"),
+    distinctUntilChanged(),
+    filter((planner) => planner !== undefined)
+);
+
+ocPlanner$
+    .pipe(
+        flatMap((planner) =>
+            from([...planner.querySelectorAll("ul.title .offences")])
+        )
+    )
+    .subscribe({
+        next: (offences) =>
+            mount(
+                offences,
+                "afterend",
+                nnbRow({ nnb: "NNB", rank: "rank", ea: "EA" })
+            ),
+    });
+
+ocPlanner$
+    .pipe(
+        flatMap((planner) =>
+            from([
+                ...planner.querySelectorAll(".plans-list ul.item:not(.title)"),
+            ])
+        )
+    )
+    .subscribe({
+        next: (item) => {
+            const key = item.querySelector("a").href.match(/[0-9]+/)[0];
+
+            const info$ = data$.pipe(
+                pluck(key),
+                distinctUntilChanged(),
+                filter((data) => data !== undefined),
+                map(dataRow)
+            );
+
+            const offences$ = of(item.querySelector(".offences"));
+            mountStream(offences$, info$, "afterend");
+        },
+    });
+
+const apiKey$ = state$.pipe(
+    pluck("settings", "apiKey"),
+    distinctUntilChanged(),
+    filter((key) => key !== undefined)
+);
+
+const yata$ = state$.pipe(
+    filter(({ settings }) => settings.yata && settings.apiKey),
+    pluck("yata"),
+    distinctUntilChanged()
+);
+
+const order$ = ocPlanner$.pipe(
+    map((planner) =>
+        planner
+            .querySelector(".plans-wrap")
+            .querySelectorAll("ul.item:not(.title) a")
+    ),
+    map((members) =>
+        [...members].map((member) => parseInt(member.href.match(/[0-9]+/)[0]))
+    )
+);
+
+const stateOrder$ = state$.pipe(pluck("order"), distinctUntilChanged());
+
+combineLatest(order$, stateOrder$)
+    .pipe(
+        filter(
+            ([order, stateOrder]) =>
+                !stateOrder?.every((el, idx) => el === order[idx])
+        ),
+        pluck(0),
+        withLatestFrom(apiKey$),
+        flatMap(([order, key]) =>
+            from(
+                yataAPI(key, "faction/crimes/import/ranking", {
                     method: "POST",
                     headers: {
                         "content-type": "application/json",
                     },
-                    body: JSON.stringify({ sub_ranking: userIDs }),
-                }
-            ).then((response) => {
-                if (response.ok) {
-                    reducer({ orderState: "pushed" });
-                } else {
-                    response
-                        .json()
-                        .then((json) => reducer({ error: json.error.error }))
-                        .catch(() =>
-                            reducer({
-                                error: `YATA returned HTTP error ${response.status} "${response.state}"`,
-                            })
-                        );
-                }
-            });
-        }
-    }
-);
-
-const redirectListener = new MemoListener(
-    ["hydrated", "settings", "pathname"],
-    ({ hydrated, settings, pathname }) => {
-        if (
-            hydrated &&
-            pathname !== "/preferences.php" &&
-            settings.state === "fresh" &&
-            confirm(
-                "The YATA - OC userscript isn't linked to your account yet. Do you want to do that now?"
+                    body: JSON.stringify({ sub_ranking: order }),
+                })
+            ).pipe(
+                mapTo((state) => ({ ...state, order, yata: undefined })),
+                catchError((error) => of((state) => ({ ...state, error })))
             )
-        ) {
-            location.href = "https://www.torn.com/preferences.php#tab=api";
-        }
-    }
+        )
+    )
+    .subscribe(sink$);
+
+const initialYATA$ = yata$.pipe(filter((yata) => !yata));
+
+const refreshYATA$ = yata$.pipe(
+    filter((yata) => yata?.timestamp && Date.now() - yata.timestamp > 3600000)
 );
 
-listeners.push(
-    errorListener,
-    ocListListener,
-    ocPlannerListener,
-    orderListener,
-    redirectListener
+merge(initialYATA$, refreshYATA$)
+    .pipe(
+        switchMapTo(
+            combineLatest(order$, stateOrder$).pipe(
+                filter(([order, stateOrder]) =>
+                    stateOrder?.every((el, idx) => el === order[idx])
+                ),
+                first()
+            )
+        ),
+        switchMapTo(apiKey$.pipe(first())),
+        flatMap((key) =>
+            from(yataAPI(key, "faction/crimes/export")).pipe(
+                map((data) => (state) => ({
+                    ...state,
+                    yata: { data, timestamp: Date.now() },
+                })),
+                catchError((error) => of((state) => ({ ...state, error })))
+            )
+        )
+    )
+    .subscribe(sink$);
+
+const ts$ = state$.pipe(
+    filter(({ settings }) => settings.ts && settings.apiKey),
+    pluck("ts"),
+    distinctUntilChanged()
 );
 
-//}}}
+const initalTS$ = ts$.pipe(filter((ts) => !ts));
+
+const refreshTS$ = ts$.pipe(
+    filter((ts) => ts?.timestamp && Date.now() - ts.timestamp > 3600000)
+);
+
+merge(initalTS$, refreshTS$)
+    .pipe(
+        switchMapTo(apiKey$.pipe(first())),
+        flatMap((key) =>
+            from(tsAPI(key, "crimes")).pipe(
+                map((data) => (state) => ({
+                    ...state,
+                    ts: { data, timestamp: Date.now() },
+                })),
+                catchError((error) => of((state) => ({ ...state, error })))
+            )
+        )
+    )
+    .subscribe(sink$);
+
+// }}}
 
 // {{{ pref page
 
-const prefListener = new MemoListener(["apiKey"], ({ apiKey }) => {
-    if (apiKey) {
-        mount(
-            document.querySelector(".preferences-wrap"),
-            "afterend",
-            apiPrefs()
-        );
-    }
-});
-
-const modalListener = new MemoListener(
-    ["apiKey", "settings"],
-    ({ apiKey, settings }) => {
-        if (apiKey && settings.state === "fresh") {
-            mount(document.body, "afterbegin", apiKeyAlert({ apiKey }));
-        } else {
-            map((container) => container.parentNode.removeChild(container))(
-                document.getElementById("yata-alert-container")
-            );
-        }
-    }
+const modal$ = state$.pipe(
+    distinctUntilChanged(
+        (prev, curr) =>
+            prev.apiKey === curr.apiKey && prev.settings === curr.settings
+    ),
+    map(({ apiKey, settings }) =>
+        apiKey && settings.state === "fresh" ? apiKeyAlert(apiKey) : []
+    )
 );
 
-listeners.push(modalListener, prefListener);
+const pref$ = of(apiPrefs());
+
+const prefWrap$ = of(document.querySelector(".preferences-wrap")).pipe(
+    filter((wrap) => wrap !== null)
+);
+
+mountStream(prefWrap$, modal$, "afterend");
+
+mountStream(prefWrap$, pref$, "afterend");
 
 // }}}
 
 // {{{ DOM interaction
 
-const crimeObserver = new MutationObserver((records) => {
-    const factionCrimes = records.filter(
-        (record) => record.target.id === "faction-crimes"
-    )[0];
-    if (factionCrimes === undefined) return;
-
-    const [ocList, ocPlanner] = [...factionCrimes.addedNodes].filter(
-        (node) => node.classList?.contains("faction-crimes-wrap") ?? false
-    );
-
-    if (ocList !== undefined || ocPlanner !== undefined)
-        reducer({ ocList, ocPlanner });
-});
-
-const observerListener = new MemoListener(["pathname"], ({ pathname }) => {
-    if (pathname === "/factions.php") {
-        crimeObserver.observe(document.getElementById("factions"), {
-            subtree: true,
-            childList: true,
-        });
-    } else if (pathname === "/preferences.php") {
-        const oldFetch = fetch;
-        unsafeWindow.fetch = function () {
-            if (arguments[0].indexOf("ajax=getApiData") === -1) {
-                return oldFetch.apply(this, arguments);
-            }
-
-            return new Promise((resolve, reject) =>
-                oldFetch
-                    .apply(this, arguments)
-                    .then((response) => {
-                        resolve(response.clone());
-                        response
-                            .json()
-                            .then((json) => reducer({ apiKey: json.apiKey }));
-                    })
-                    .catch(reject)
-            );
-        };
-    } else {
-        crimeObserver.disconnect();
-    }
-});
-
-listeners.push(observerListener);
-
-// }}}
-
-// {{{ APIs
-
-const yataListener = new MemoListener(
-    ["orderState", "yata", "error", "settings"],
-    ({ orderState, yata, error, settings }) => {
-        if (
-            !settings.yata ||
-            error ||
-            (orderState && ["pushing", "pulling"].includes(orderState)) ||
-            (yata?.timestamp &&
-                orderState === "pulled" &&
-                Date.now() - yata.timestamp < 3600000)
+if (location.pathname === "/factions.php") {
+    fromEventPattern(
+        (handler) => {
+            const observer = new MutationObserver(handler);
+            observer.observe(document.getElementById("factions"), {
+                subtree: true,
+                childList: true,
+            });
+            return observer;
+        },
+        (_, observer) => observer.disconnect()
+    )
+        .pipe(
+            pluck(0),
+            map((records) =>
+                records.find((record) => record.target.id === "faction-crimes")
+            ),
+            filter((crimes) => crimes !== undefined),
+            map((crimes) =>
+                [...crimes.addedNodes].filter((node) =>
+                    node.classList?.contains("faction-crimes-wrap")
+                )
+            ),
+            filter((nodes) => nodes.length === 2),
+            map(([ocList, ocPlanner]) => (state) => ({
+                ...state,
+                ocList,
+                ocPlanner,
+            }))
         )
-            return;
+        .subscribe(sink$);
+}
 
-        gmFetch(
-            `https://yata.yt/api/v1/faction/crimes/export/?key=${settings.apiKey}`
-        ).then((response) => {
-            if (!response.ok) {
-                return response
-                    .json()
-                    .then((json) => reducer({ error: json.error.error }))
-                    .catch(() =>
-                        reducer({
-                            error: `YATA returned HTTP error ${response.status} "${response.state}"`,
-                        })
+if (location.pathname === "/preferences.php") {
+    const oldFetch = fetch;
+    unsafeWindow.fetch = function () {
+        if (arguments[0].indexOf("ajax=getApiData") === -1) {
+            return oldFetch.apply(this, arguments);
+        }
+
+        return new Promise((resolve, reject) =>
+            oldFetch
+                .apply(this, arguments)
+                .then((response) => {
+                    resolve(response.clone());
+                    response.json().then(({ apiKey }) =>
+                        sink$.next((state) => ({
+                            ...state,
+                            apiKey,
+                        }))
                     );
-            } else {
-                return response.json().then((json) =>
-                    reducer({
-                        yata: { data: json, timestamp: Date.now() },
-                        orderState: "pulled",
-                    })
-                );
-            }
-        });
-        reducer({ orderState: "pulling" });
-    }
-);
-
-const tsListener = new MemoListener(
-    ["ts", "error", "settings"],
-    ({ ts, error, settings }) => {
-        if (
-            !settings.ts ||
-            error ||
-            (ts?.timestamp && Date.now() - ts.timestamp < 3600000)
-        )
-            return;
-
-        gmFetch(
-            `https://www.tornstats.com/api.php?action=crimes&key=${settings.apiKey}`
-        ).then((response) => {
-            if (!response.ok) {
-                return response
-                    .json()
-                    .then((json) => reducer({ error: json.error.error }))
-                    .catch(() =>
-                        reducer({
-                            error: `TornStats returned HTTP error ${response.status} "${response.state}"`,
-                        })
-                    );
-            } else {
-                return response.json().then((json) =>
-                    reducer({
-                        ts: { data: json, timestamp: Date.now() },
-                    })
-                );
-            }
-        });
-    }
-);
-
-listeners.push(yataListener, tsListener);
+                })
+                .catch(reject)
+        );
+    };
+}
 
 // }}}
 
