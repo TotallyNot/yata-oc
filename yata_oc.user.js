@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.0.0
+// @version      2.0.1
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -459,7 +459,7 @@ const dataRow = ({ nnb, rank, ea, verified, source }) => {
         case "TS":
             return nnbRow({
                 nnb: nnb ? `${nnb}${verified ? "" : "*"}  (TS)` : "-",
-                rank: "-",
+                rank: rank ?? "-",
                 ea: "-",
             });
         default:
