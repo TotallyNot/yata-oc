@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.0
+// @version      2.1.1
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -134,7 +134,7 @@ const tags = [
     "input",
     "button",
     "label",
-    "br",
+    "hr",
     "h3",
     "p",
     "span",
@@ -215,6 +215,22 @@ mount(
     margin-top: 10px;
     display: flex;
     align-items: center;
+}
+
+.yata-message {
+    background-color: white;
+    border-radius: 5px;
+    padding: 5px;
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.yata-divider {
+    width: 100%;
+    margin-top: 3px !important;
+    margin-bottom: 3px !important;
 }
 
 .yata-box span {
@@ -460,21 +476,12 @@ const dataRow = ({ nnb, rank, ea, verified, source }) => {
     }
 };
 
-const yataMessage = ({ color, message }) =>
-    div(
-        {
-            class: `info-msg-cont border-round yata-message ${color}`,
-            id: "yata-oc-message",
-        },
-        [
-            div({ class: "info-msg border-round" }, [
-                i({ class: "info-icon" }),
-                div({ class: "delimiter" }, [
-                    div({ class: "msg right-round" }, `YATA - OC: ${message}`),
-                ]),
-            ]),
-        ]
-    );
+const yataError = ({ message }) =>
+    div({ class: "yata-message" }, [
+        "YATA -OC",
+        hr({ class: "yata-divider" }),
+        p([span({ class: "yata-warning" }, "Error: "), message]),
+    ]);
 
 const apiKeyAlert = (apiKey) =>
     div({ id: "yata-alert-container" }, [
@@ -599,6 +606,18 @@ state$
 // }}}
 
 // {{{ OC page
+
+const factionMain$ = of(document.querySelector("#faction-main")).pipe(
+    filter((node) => node !== null)
+);
+
+const errorMessage$ = state$.pipe(
+    pluck("error"),
+    distinctUntilChanged(),
+    map((error) => (error ? yataError({ message: error }) : []))
+);
+
+mountStream(factionMain$, errorMessage$, "beforebegin");
 
 const yataData$ = state$.pipe(pluck("yata"), distinctUntilChanged());
 
