@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.0.1
+// @version      2.1.0
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -47,6 +47,7 @@ const {
     refCount,
     catchError,
     delay,
+    share,
 } = rxjs.operators;
 
 // }}}
@@ -179,16 +180,8 @@ mount(
     display: inline-block;
 }
 
-.organize-wrap .level {
-    width: 57px !important;
-}
-
 .plans-list li.member {
     width: 200px !important;
-}
-
-.plans-list li.offences {
-    width: 80px !important;
 }
 
 .plans-list li.stat {
@@ -689,6 +682,18 @@ ocList$
         },
     });
 
+ocList$.subscribe({
+    next: (list) => {
+        // supersede injected stylesheets...
+        [...list.querySelectorAll(".member")].forEach((elem) =>
+            elem.setAttribute("style", "width:400px !important")
+        );
+        [...list.querySelectorAll(".level")].forEach((elem) =>
+            elem.setAttribute("style", "width:57px !important")
+        );
+    },
+});
+
 const ocPlanner$ = state$.pipe(
     pluck("ocPlanner"),
     distinctUntilChanged(),
@@ -733,6 +738,15 @@ ocPlanner$
             mountStream(offences$, info$, "afterend");
         },
     });
+
+ocPlanner$.subscribe({
+    next: (planner) => {
+        // supersede injected stylesheets...
+        [...planner.querySelectorAll(".offences")].forEach((elem) =>
+            elem.setAttribute("style", "width:80px !important")
+        );
+    },
+});
 
 const apiKey$ = state$.pipe(
     pluck("settings", "apiKey"),
@@ -869,7 +883,7 @@ mountStream(prefWrap$, pref$, "afterend");
 // {{{ DOM interaction
 
 if (location.pathname === "/factions.php") {
-    fromEventPattern(
+    const dom$ = fromEventPattern(
         (handler) => {
             const observer = new MutationObserver(handler);
             observer.observe(document.getElementById("factions"), {
@@ -879,26 +893,41 @@ if (location.pathname === "/factions.php") {
             return observer;
         },
         (_, observer) => observer.disconnect()
-    )
-        .pipe(
-            pluck(0),
-            map((records) =>
-                records.find((record) => record.target.id === "faction-crimes")
-            ),
-            filter((crimes) => crimes !== undefined),
-            map((crimes) =>
-                [...crimes.addedNodes].filter((node) =>
-                    node.classList?.contains("faction-crimes-wrap")
-                )
-            ),
-            filter((nodes) => nodes.length === 2),
-            map(([ocList, ocPlanner]) => (state) => ({
-                ...state,
-                ocList,
-                ocPlanner,
-            }))
+    ).pipe(pluck(0), share());
+
+    dom$.pipe(
+        map((records) =>
+            records.find((record) => record.target.id === "faction-crimes")
+        ),
+        filter((crimes) => crimes !== undefined),
+        map((crimes) =>
+            [...crimes.addedNodes].filter((node) =>
+                node.classList?.contains("faction-crimes-wrap")
+            )
+        ),
+        filter((nodes) => nodes.length === 2),
+        map(([ocList, ocPlanner]) => (state) => ({
+            ...state,
+            ocList,
+            ocPlanner,
+        }))
+    ).subscribe(sink$);
+
+    dom$.pipe(
+        map((records) =>
+            records.map((record) => [...record.addedNodes]).flat()
+        ),
+        map((addedNodes) =>
+            addedNodes.filter(
+                (node) =>
+                    node.classList &&
+                    (node.classList.contains("doctorn-faction-nnb-value") ||
+                        node.classList.contains("tt-nnb"))
+            )
         )
-        .subscribe(sink$);
+    ).subscribe({
+        next: (nodes) => nodes.forEach((node) => node.remove()),
+    });
 }
 
 if (location.pathname === "/preferences.php") {
