@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.1
+// @version      2.1.2
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -947,6 +947,24 @@ if (location.pathname === "/factions.php") {
     ).subscribe({
         next: (nodes) => nodes.forEach((node) => node.remove()),
     });
+
+    state$
+        .pipe(
+            filter(
+                (state) => state.hydrated && state.settings.state === "fresh"
+            ),
+            first(),
+            filter(() =>
+                confirm(
+                    "The YATA - OC userscript isn't linked to your account yet. Do you wish to do that now?"
+                )
+            )
+        )
+        .subscribe({
+            next: () => {
+                location.href = "https://www.torn.com/preferences.php#tab=api";
+            },
+        });
 }
 
 if (location.pathname === "/preferences.php") {
