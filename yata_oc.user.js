@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.3
+// @version      2.1.4
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -384,6 +384,7 @@ const yataAPI = (key, path, config) =>
                     throw {
                         message: response.statusText,
                         code: response.status,
+                        source: "YATA",
                     };
                 }
             }
@@ -476,12 +477,18 @@ const dataRow = ({ nnb, rank, ea, verified, source }) => {
     }
 };
 
-const yataError = ({ message }) =>
-    div({ class: "yata-message" }, [
+const yataError = ({ error }) => {
+    let message = error.message;
+    if (error.source) {
+        message += ` (from ${error.source})`;
+    }
+
+    return div({ class: "yata-message" }, [
         "YATA -OC",
         hr({ class: "yata-divider" }),
         p([span({ class: "yata-warning" }, "Error: "), message]),
     ]);
+};
 
 const apiKeyAlert = (apiKey) =>
     div({ id: "yata-alert-container" }, [
@@ -614,7 +621,7 @@ const factionMain$ = of(document.querySelector("#faction-main")).pipe(
 const errorMessage$ = state$.pipe(
     pluck("error"),
     distinctUntilChanged(),
-    map((error) => (error ? yataError({ message: error }) : []))
+    map((error) => (error ? yataError({ error }) : []))
 );
 
 mountStream(factionMain$, errorMessage$, "beforebegin");
