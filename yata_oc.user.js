@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.4
+// @version      2.1.5
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -406,7 +406,7 @@ const tsAPI = (key, action, config) =>
                         return body;
                     } else {
                         throw {
-                            message: error,
+                            message: body.error,
                             code: response.status,
                         };
                     }
