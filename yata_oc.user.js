@@ -1,16 +1,17 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.6
+// @version      2.1.7
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit [2111649]
 // @match        https://www.torn.com/factions.php*
 // @match        https://www.torn.com/preferences.php*
-// @grant        GM.xmlHttpRequest
-// @grant        GM.setValue
-// @grant        GM.getValue
+// @grant        GM_xmlhttpRequest
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        unsafeWindow
 // @connect      yata.yt
 // @connect      beta.tornstats.com
 // @require      https://unpkg.com/rxjs@6.6.3/bundles/rxjs.umd.min.js#sha256=5b57748e6106387c0c1ecc830f7ade320585f5c709efa1e13584e423e21c37fe
