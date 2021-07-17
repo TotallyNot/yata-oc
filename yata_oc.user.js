@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.7
+// @version      2.1.8
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
 // @author       Pyrit [2111649]
 // @match        https://www.torn.com/factions.php*
 // @match        https://www.torn.com/preferences.php*
-// @grant        GM_xmlhttpRequest
-// @grant        GM_setValue
-// @grant        GM_getValue
+// @grant        GM.xmlHttpRequest
+// @grant        GM.setValue
+// @grant        GM.getValue
 // @grant        unsafeWindow
 // @connect      yata.yt
 // @connect      beta.tornstats.com
@@ -392,7 +392,10 @@ const yataAPI = (key, path, config) =>
         });
 
 const tsAPI = (key, action, config) =>
-    gmFetch(`https://beta.tornstats.com/api/v1/${key}/faction/crimes`, config)
+    gmFetch(
+        `https://beta.tornstats.com/api/v1/${key}/faction/${action}`,
+        config
+    )
         .catch(({ message }) => {
             throw { message, code: -1, source: "TornStats" };
         })
@@ -867,7 +870,7 @@ merge(initalTS$, refreshTS$)
     .pipe(
         switchMapTo(apiKey$.pipe(first())),
         flatMap((key) =>
-            from(tsAPI(key, "crimes")).pipe(
+            from(tsAPI(key, "crimes", { method: "GET" })).pipe(
                 map((data) => (state) => ({
                     ...state,
                     ts: { data, timestamp: Date.now() },
