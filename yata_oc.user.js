@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.1.8
+// @version      2.2.0
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -74,6 +74,8 @@ class HTMLPrimitive {
                     name.substring(2).toLowerCase(),
                     value
                 );
+            } else if (typeof value === "boolean") {
+                if (value) element.setAttribute(name, "");
             } else {
                 element.setAttribute(name, value);
             }
@@ -139,6 +141,8 @@ const tags = [
     "h3",
     "p",
     "span",
+    "select",
+    "option",
 ];
 
 Object.defineProperties(
@@ -171,7 +175,7 @@ mount(
 
 .yata-rank {
     text-align: left !important;
-    width: 35px;
+    width: 96px;
     display: inline-block;
 }
 
@@ -210,7 +214,6 @@ mount(
 }
 
 .yata-box {
-    background-color: white;
     border-radius: 5px;
     padding: 5px;
     margin-top: 10px;
@@ -244,7 +247,6 @@ mount(
     top: 40%;
     display: inline-block;
     transform: translate(-50%, -50%);
-    background-color: white;
     border-radius: 5px;
     margin: 20px;
     width: 300px;
@@ -348,6 +350,18 @@ function gmFetch(url, config) {
     });
 }
 
+function shallowCompare(prevObj, newObj) {
+    if (prevObj === undefined) return newObj === undefined;
+
+    if (Object.keys(newObj).count !== Object.keys(prevObj).count) return false;
+
+    for (const key in newObj) {
+        if (newObj[key] !== prevObj[key]) return false;
+    }
+
+    return true;
+}
+
 // }}}
 
 // {{{ APIs
@@ -425,9 +439,23 @@ const tsAPI = (key, action, config) =>
 
 // {{{ state management
 
+const migrations = {
+    "2.2.0": ({ settings, ...rest }) => ({
+        ...rest,
+        settings: {
+            yata: {
+                active: settings.yata,
+                key: settings.apiKey,
+            },
+            ts: { active: settings.ts, key: settings.apiKey },
+        },
+    }),
+};
+
 const initialState = {
     settings: {
         state: "fresh",
+        migrations: Object.keys(migrations),
     },
 };
 
@@ -446,35 +474,32 @@ const sink$ = { next: (reducer) => sinkProxy$.next(reducer) };
 
 state$.subscribe({
     next: console.log,
-    complete: console.log("state stream complete"),
+    complete: () => console.log("state stream complete"),
 });
 
 // }}}
 
 // {{{ components
 
-const nnbRow = ({ nnb, rank, ea }) => [
+const nnbRow = ({ nnb, rank }) => [
     li({ class: "yata-nnb" }, [nnb, div({ class: "delimiter-white" })]),
     li({ class: "yata-rank" }, [rank, div({ class: "delimiter-white" })]),
-    li({ class: "yata-ea" }, [ea, div({ class: "delimiter-white" })]),
 ];
 
-const dataRow = ({ nnb, rank, ea, verified, source }) => {
+const dataRow = ({ nnb, rank, verified, source }) => {
     switch (source) {
         case "YATA":
             return nnbRow({
                 nnb: nnb ? div([nnb, i({ class: "yata-icon" })]) : "-",
                 rank: rank ?? "-",
-                ea: ea ?? "-",
             });
         case "TS":
             return nnbRow({
                 nnb: nnb ? `${nnb}${verified ? "" : "*"}  (TS)` : "-",
                 rank: rank ?? "-",
-                ea: "-",
             });
         default:
-            return nnbRow({ nnb: "-", rank: rank ?? "-", ea: ea ?? "-" });
+            return nnbRow({ nnb: "-", rank: rank ?? "-" });
     }
 };
 
@@ -491,28 +516,23 @@ const yataError = ({ error }) => {
     ]);
 };
 
-const apiKeyAlert = (apiKey) =>
-    div({ id: "yata-alert-container" }, [
-        div({ class: "yata-alert-box" }, [
+const apiKeyAlert = (keys, state) => {
+    const patchState = (patch) =>
+        sink$.next((oldState) => ({
+            ...oldState,
+            modalState: {
+                ...state,
+                ...patch,
+            },
+        }));
+
+    return div({ id: "yata-alert-container" }, [
+        div({ class: "yata-alert-box cont-gray" }, [
             h3("YATA - OC"),
-            p("Select which sources to use to power the script:"),
+            p("Choose which sources to use, and select the correct API key:"),
             form(
                 {
                     id: "yata-sources",
-                    onSubmit: (event) => {
-                        const yata = event.target.elements.yata.checked;
-                        const ts = event.target.elements.ts.checked;
-                        sink$.next((state) => ({
-                            ...state,
-                            settings: {
-                                state: "selected",
-                                apiKey,
-                                yata,
-                                ts,
-                            },
-                        }));
-                        event.preventDefault();
-                    },
                 },
                 [
                     div({ class: "yata-row" }, [
@@ -520,16 +540,85 @@ const apiKeyAlert = (apiKey) =>
                             input({
                                 type: "checkbox",
                                 name: "yata",
-                                checked: true,
+                                checked: state.yata,
+                                onClick: () =>
+                                    patchState({ yata: !state.yata }),
                             }),
                             "YATA",
                         ]),
+                        select(
+                            {
+                                disabled: !state.yata,
+                                onChange: ({ target }) => {
+                                    const key =
+                                        target.options[target.selectedIndex]
+                                            .dataset.key;
+                                    patchState({
+                                        yataKey: key,
+                                    });
+                                },
+                            },
+                            [
+                                option(
+                                    {
+                                        disabled: true,
+                                        selected: state.yataKey === undefined,
+                                    },
+                                    "--select api key--"
+                                ),
+                                ...keys.map((key) =>
+                                    option(
+                                        {
+                                            "data-key": key.key,
+                                            selected: state.yataKey === key.key,
+                                        },
+                                        key.title || "Default"
+                                    )
+                                ),
+                            ]
+                        ),
                     ]),
                     div({ class: "yata-row" }, [
                         label({ for: "ts" }, [
-                            input({ type: "checkbox", name: "ts" }),
+                            input({
+                                type: "checkbox",
+                                name: "ts",
+                                checked: state.ts,
+                                onClick: () => patchState({ ts: !state.ts }),
+                            }),
                             "TornStats",
                         ]),
+                        select(
+                            {
+                                disabled: !state.ts,
+                                onChange: ({ target }) => {
+                                    const key =
+                                        target.options[target.selectedIndex]
+                                            .dataset.key;
+                                    patchState({
+                                        tsKey: key,
+                                    });
+                                },
+                            },
+                            [
+                                option(
+                                    {
+                                        disabled: true,
+                                        selected: state.tsKey === undefined,
+                                    },
+                                    "--select api key--"
+                                ),
+                                ...keys.map((key) =>
+                                    option(
+                                        {
+                                            "data-key": key.key,
+                                            selected: state.tsKey === key.key,
+                                        },
+                                        key.title || "Default"
+                                    )
+                                ),
+                            ]
+                        ),
                     ]),
                 ]
             ),
@@ -546,8 +635,8 @@ const apiKeyAlert = (apiKey) =>
                                 ...state,
                                 settings: {
                                     state: "selected",
-                                    yata: false,
-                                    ts: false,
+                                    yata: { active: false },
+                                    ts: { active: false },
                                 },
                             })),
                     },
@@ -556,7 +645,24 @@ const apiKeyAlert = (apiKey) =>
                 button(
                     {
                         class: "yata-btn yata-btn-primary",
-                        type: "submit",
+                        disabled:
+                            (state.yata && state.yataKey === undefined) ||
+                            (state.ts && state.tsKey === undefined),
+                        onClick: () =>
+                            sink$.next((oldState) => ({
+                                ...oldState,
+                                settings: {
+                                    state: "selected",
+                                    yata: {
+                                        active: state.yata,
+                                        key: state.yataKey,
+                                    },
+                                    ts: {
+                                        active: state.ts,
+                                        key: state.tsKey,
+                                    },
+                                },
+                            })),
                         form: "yata-sources",
                     },
                     "confirm"
@@ -564,9 +670,10 @@ const apiKeyAlert = (apiKey) =>
             ]),
         ]),
     ]);
+};
 
 const apiPrefs = () =>
-    div({ class: "yata-box" }, [
+    div({ class: "yata-box cont-gray" }, [
         span("YATA - OC"),
         button(
             {
@@ -594,17 +701,28 @@ from(GM.getValue("state"))
     .pipe(
         map(JSON.parse),
         filter((state) => state !== null),
-        map((state) => (prev) => ({ ...prev, ...state, hydrated: true }))
+        map((state) => (prev) => {
+            let next = state;
+            for ([key, migr] of Object.entries(migrations)) {
+                if (!next.migrations || !next.migrations.includes(key)) {
+                    next = migr(next);
+                    next.migrations = [...(next.migrations || []), key];
+                }
+            }
+            console.log(next, state);
+            return { ...prev, ...next, hydrated: true };
+        })
     )
     .subscribe(sink$);
 
 state$
     .pipe(
-        map(({ settings, yata, ts, order }) => ({
+        map(({ settings, yata, ts, order, migrations }) => ({
             settings,
             yata,
             ts,
             order,
+            migrations,
         }))
     )
     .subscribe({
@@ -775,14 +893,17 @@ ocPlanner$.subscribe({
     },
 });
 
-const apiKey$ = state$.pipe(
-    pluck("settings", "apiKey"),
+const yataKey$ = state$.pipe(
+    pluck("settings", "yata", "key"),
     distinctUntilChanged(),
     filter((key) => key !== undefined)
 );
 
 const yata$ = state$.pipe(
-    filter(({ settings }) => settings.yata && settings.apiKey),
+    filter(
+        ({ settings }) =>
+            settings.yata && settings.yata.active && settings.yata.key
+    ),
     pluck("yata"),
     distinctUntilChanged()
 );
@@ -807,7 +928,7 @@ combineLatest(order$, stateOrder$)
                 !stateOrder?.every((el, idx) => el === order[idx])
         ),
         pluck(0),
-        withLatestFrom(apiKey$),
+        withLatestFrom(yataKey$),
         flatMap(([order, key]) =>
             from(
                 yataAPI(key, "faction/crimes/import/ranking", {
@@ -841,7 +962,7 @@ merge(initialYATA$, refreshYATA$)
                 first()
             )
         ),
-        switchMapTo(apiKey$.pipe(first())),
+        switchMapTo(yataKey$.pipe(first())),
         flatMap((key) =>
             from(yataAPI(key, "faction/crimes/export")).pipe(
                 map((data) => (state) => ({
@@ -854,8 +975,16 @@ merge(initialYATA$, refreshYATA$)
     )
     .subscribe(sink$);
 
+const tsKey$ = state$.pipe(
+    pluck("settings", "ts", "key"),
+    distinctUntilChanged(),
+    filter((key) => key !== undefined)
+);
+
 const ts$ = state$.pipe(
-    filter(({ settings }) => settings.ts && settings.apiKey),
+    filter(
+        ({ settings }) => settings.ts && settings.ts.active && settings.ts.key
+    ),
     pluck("ts"),
     distinctUntilChanged()
 );
@@ -868,7 +997,7 @@ const refreshTS$ = ts$.pipe(
 
 merge(initalTS$, refreshTS$)
     .pipe(
-        switchMapTo(apiKey$.pipe(first())),
+        switchMapTo(tsKey$.pipe(first())),
         flatMap((key) =>
             from(tsAPI(key, "crimes", { method: "GET" })).pipe(
                 map((data) => (state) => ({
@@ -888,10 +1017,15 @@ merge(initalTS$, refreshTS$)
 const modal$ = state$.pipe(
     distinctUntilChanged(
         (prev, curr) =>
-            prev.apiKey === curr.apiKey && prev.settings === curr.settings
+            (prev.keys && prev.keys.length) ===
+                (curr.keys && curr.keys.length) &&
+            prev.settings === curr.settings &&
+            shallowCompare(prev.modalState, curr.modalState)
     ),
-    map(({ apiKey, settings }) =>
-        apiKey && settings.state === "fresh" ? apiKeyAlert(apiKey) : []
+    map(({ keys, settings, modalState }) =>
+        keys && settings.state === "fresh"
+            ? apiKeyAlert(keys, modalState || { yata: true, ts: false })
+            : []
     )
 );
 
@@ -978,7 +1112,7 @@ if (location.pathname === "/factions.php") {
 if (location.pathname === "/preferences.php") {
     const oldFetch = fetch;
     unsafeWindow.fetch = function () {
-        if (arguments[0].indexOf("ajax=getApiData") === -1) {
+        if (arguments[0].indexOf("sid=apiData") === -1) {
             return oldFetch.apply(this, arguments);
         }
 
@@ -987,10 +1121,10 @@ if (location.pathname === "/preferences.php") {
                 .apply(this, arguments)
                 .then((response) => {
                     resolve(response.clone());
-                    response.json().then(({ apiKey }) =>
+                    response.json().then(({ keys }) =>
                         sink$.next((state) => ({
                             ...state,
-                            apiKey,
+                            keys,
                         }))
                     );
                 })
