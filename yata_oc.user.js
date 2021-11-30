@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.2.0
+// @version      2.2.1
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -443,11 +443,9 @@ const migrations = {
     "2.2.0": ({ settings, ...rest }) => ({
         ...rest,
         settings: {
-            yata: {
-                active: settings.yata,
-                key: settings.apiKey,
-            },
+            yata: { active: settings.yata, key: settings.apiKey },
             ts: { active: settings.ts, key: settings.apiKey },
+            state: settings.state,
         },
     }),
 };
@@ -699,6 +697,7 @@ const apiPrefs = () =>
 
 from(GM.getValue("state"))
     .pipe(
+        map((json) => json || JSON.stringify(initialState)),
         map(JSON.parse),
         filter((state) => state !== null),
         map((state) => (prev) => {
