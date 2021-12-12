@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.2.1
+// @version      2.2.2
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -443,8 +443,8 @@ const migrations = {
     "2.2.0": ({ settings, ...rest }) => ({
         ...rest,
         settings: {
-            yata: { active: settings.yata, key: settings.apiKey },
-            ts: { active: settings.ts, key: settings.apiKey },
+            yata: { active: settings.yata === true, key: settings.apiKey },
+            ts: { active: settings.ts === true, key: settings.apiKey },
             state: settings.state,
         },
     }),
@@ -453,8 +453,8 @@ const migrations = {
 const initialState = {
     settings: {
         state: "fresh",
-        migrations: Object.keys(migrations),
     },
+    migrations: Object.keys(migrations),
 };
 
 const state$ = new BehaviorSubject(initialState);
@@ -898,6 +898,8 @@ const yataKey$ = state$.pipe(
     filter((key) => key !== undefined)
 );
 
+yataKey$.subscribe(console.log);
+
 const yata$ = state$.pipe(
     filter(
         ({ settings }) =>
@@ -924,10 +926,11 @@ combineLatest(order$, stateOrder$)
     .pipe(
         filter(
             ([order, stateOrder]) =>
-                !stateOrder?.every((el, idx) => el === order[idx])
+                !stateOrder || !stateOrder.every((el, idx) => el === order[idx])
         ),
         pluck(0),
         withLatestFrom(yataKey$),
+        tap(console.log),
         flatMap(([order, key]) =>
             from(
                 yataAPI(key, "faction/crimes/import/ranking", {
