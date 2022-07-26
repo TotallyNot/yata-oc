@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.2.3
+// @version      2.2.4
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -924,7 +924,7 @@ combineLatest(order$, stateOrder$)
     .pipe(
         filter(
             ([order, stateOrder]) =>
-                stateOrder.length !== order.length ||
+                stateOrder?.length !== order.length ||
                 !stateOrder.length ||
                 !stateOrder.every((el, idx) => el === order[idx])
         ),
