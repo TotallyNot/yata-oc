@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YATA - OC
 // @namespace    yata.yt
-// @version      2.2.2
+// @version      2.2.3
 // @updateURL    https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @downloadURL  https://raw.githubusercontent.com/TotallyNot/yata-oc/master/yata_oc.user.js
 // @description  Display additional member information on the OC page using the YATA API.
@@ -898,8 +898,6 @@ const yataKey$ = state$.pipe(
     filter((key) => key !== undefined)
 );
 
-yataKey$.subscribe(console.log);
-
 const yata$ = state$.pipe(
     filter(
         ({ settings }) =>
@@ -926,11 +924,12 @@ combineLatest(order$, stateOrder$)
     .pipe(
         filter(
             ([order, stateOrder]) =>
-                !stateOrder || !stateOrder.every((el, idx) => el === order[idx])
+                stateOrder.length !== order.length ||
+                !stateOrder.length ||
+                !stateOrder.every((el, idx) => el === order[idx])
         ),
         pluck(0),
         withLatestFrom(yataKey$),
-        tap(console.log),
         flatMap(([order, key]) =>
             from(
                 yataAPI(key, "faction/crimes/import/ranking", {
